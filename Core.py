@@ -22,3 +22,7 @@ def choose_option():
 
 
 choose_option()
+
+Hunger = 75
+Health = 75
+Happiness = 75
