@@ -48,6 +48,7 @@ def feed_pet():  # this is the 1st action you can do
     Happiness += 10
     if Happiness > 100:
         Happiness = 100
+    Dollars -= 5
     print(f"\nYou fed {pet_name}! They look happier already.")
 
 def play_with_pet():  # this is the second one we can do
@@ -58,6 +59,7 @@ def play_with_pet():  # this is the second one we can do
     Health += 10
     if Health > 100:
         Health = 100
+    Dollars -= 5
     print(f"\nYou played with {pet_name}! They seem full of energy now.")
 
 
