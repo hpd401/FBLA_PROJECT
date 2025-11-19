@@ -20,6 +20,7 @@ def choose_option():
     else:
         print("Invalid choice. Please choose 1, 2, 3, or 4.")
         return None, None
+        continue 
 
     pet_name = input(f"What would you like to name your {pet_type}? ")
     print(f"\nAwesome! You chose a {pet_type} named {pet_name}!")
@@ -62,8 +63,49 @@ def play_with_pet():  # this is the second one we can do
     Dollars -= 5
     print(f"\nYou played with {pet_name}! They seem full of energy now.")
 
+def main():  
+    while True:
+        print("\nwhat would you like to do?")
+        print(f"\n1.feed {pet_name}")
+        print(f"\n2.play with {pet_name} ")
+        print("3.show stats")
+        print("4. Play a minigame")
+        print("5.Quit")
 
-show_stats()
-feed_pet()
-play_with_pet()
-show_stats()    #devlog 1: we need to find someone to animate or do it ourselves but rn we chilling and I am about 1/2 done.  I am also stoppoing ctrl+c and ctrl+v my debugged code from chatgpt and imput in by hand.
+        imp = input("Choose a number:")
+
+        if imp == "1":
+            feed_pet(pet_name)
+        
+        elif imp == "2":
+            play_with_pet(pet_name)
+        
+        elif imp == "3":
+            show_stats()
+        
+        elif imp == "4":
+            print("choose a minigame!")
+            print("1.Feeding Frenzy")
+            print("2.Trick Time")
+            print("3.Medical Mayhem")
+            print("4.Return")
+
+            if imp == "1":
+                run minigame_hunger(pet_name)
+            
+            elif imp == "2":
+                run minigame_happiness(pet_name)
+            
+            elif imp == "3":
+                run minigame_health(pet_name)
+            
+            else imp == "4":
+                return
+        
+        elif imp == "5":
+            print("goodbye")
+            break
+        
+        else:
+            print("invalid choice,choose again")
+            continue
