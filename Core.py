@@ -63,7 +63,7 @@ def play_with_pet():  # this is the second one we can do
     Dollars -= 5
     print(f"\nYou played with {pet_name}! They seem full of energy now.")
 
-def main():  #dev log3: i accdentallt deleted the 1st devlog but thats ok. this code should fix the problem of the function happening without input so thanks book and google
+def main():  #dev log3: i accdentaly deleted the 1st devlog but thats ok. this code should fix the problem of the function happening without input so thanks book and google
     while True:
         print("\nwhat would you like to do?")
         print(f"\n1.feed {pet_name}")
