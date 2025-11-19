@@ -1,4 +1,4 @@
-print("Welcome to Pet Pals!")  # Opening title card and intro code so we get that pokemon style intro 
+print("Welcome to snugbit!")  # Opening title card and intro code so we get that pokemon style intro 
 
 def choose_option():
     print("\nPlease choose your pet:")
@@ -63,7 +63,7 @@ def play_with_pet():  # this is the second one we can do
     Dollars -= 5
     print(f"\nYou played with {pet_name}! They seem full of energy now.")
 
-def main():  
+def main():  #dev log3: i accdentallt deleted the 1st devlog but thats ok. this code should fix the problem of the function happening without input so thanks book and google
     while True:
         print("\nwhat would you like to do?")
         print(f"\n1.feed {pet_name}")
@@ -72,7 +72,7 @@ def main():
         print("4. Play a minigame")
         print("5.Quit")
 
-        imp = input("Choose a number:")
+        imp = input("Choose a number:") # if chedder = cheese elif nachos elif tacos else nacho, taco
 
         if imp == "1":
             feed_pet(pet_name)
