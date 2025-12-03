@@ -19,7 +19,7 @@ def choose_option():
         pet_type = "Robot"
     else:
         print("Invalid choice. Please choose 1, 2, 3, or 4.")
-        return None, None
+      
         continue 
 
     pet_name = input(f"What would you like to name your {pet_type}? ")
@@ -43,6 +43,9 @@ def show_stats():
 
 def feed_pet():  # this is the 1st action you can do
     global Hunger, Happiness
+    if Dollars < 5:
+        print("sorry,you don't have enough dollars")
+        return
     Hunger += 10
     if Hunger > 100:
         Hunger = 100
@@ -54,6 +57,9 @@ def feed_pet():  # this is the 1st action you can do
 
 def play_with_pet():  # this is the second one we can do
     global Happiness, Health
+    if Dollars < 5:
+        print ("Sorry, you dont have enough dollars")
+        return
     Happiness += 10
     if Happiness > 100:
         Happiness = 100
@@ -75,10 +81,10 @@ def main():  #dev log3: i accdentaly deleted the 1st devlog but thats ok. this c
         imp = input("Choose a number:") # if chedder = cheese elif nachos elif tacos else nacho, taco
 
         if imp == "1":
-            feed_pet(pet_name)
+            feed_pet()
         
         elif imp == "2":
-            play_with_pet(pet_name)
+            play_with_pet()
         
         elif imp == "3":
             show_stats()
@@ -89,18 +95,24 @@ def main():  #dev log3: i accdentaly deleted the 1st devlog but thats ok. this c
             print("2.Trick Time")
             print("3.Medical Mayhem")
             print("4.Return")
+            fun_choice = input("choose_a_minigame: ")
 
-            if imp == "1":
-                run minigame_hunger(pet_name)
+            if fun_choice == "1":
+                minigame_hunger()
+
+            elif fun_choice == "2":
+                minigame_happiness()
+
+            elif fun_choice == "3":
+                minigame_health()
             
-            elif imp == "2":
-                run minigame_happiness(pet_name)
+            elif fun_choice == "4":
+                pass
             
-            elif imp == "3":
-                run minigame_health(pet_name)
-            
-            else imp == "4":
-                return
+            else:
+                print("invalid choice")
+                continue
+
         
         elif imp == "5":
             print("goodbye")
@@ -109,3 +121,4 @@ def main():  #dev log3: i accdentaly deleted the 1st devlog but thats ok. this c
         else:
             print("invalid choice,choose again")
             continue
+main()
