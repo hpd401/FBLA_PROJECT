@@ -2,10 +2,8 @@
 def update_dollars():
     global Dollars
 
-    if minigame_Hunger is true
-    Dollars += 10
+Dollars_Max =999999 # stonks
 
-    if minigame_health is true
-    Dollars += 10
-def show_stats():
-    print("you have {dollars} dollars")  # stonks
+if Dollars > Dollars_Max:
+    Dollars = Dollars_Max
+

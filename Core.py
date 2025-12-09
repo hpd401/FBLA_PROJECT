@@ -30,10 +30,28 @@ def choose_option():
 
 pet_type, pet_name = choose_option()
 
-# Stats setup
+# Stats setup & cap 
 Hunger = 75
 Health = 75
 Happiness = 75
+Energy = 75
+
+Hunger_Max = 100
+Health_Max = 100
+Happiness_Max = 100
+Energy_Max = 100 # I spent four hours coding this, the minigames and the Ageing system then exited and forgot to save so it was all lost ... bruh
+
+if Happiness > Happiness_Max:
+    Happiness = Happiness_Max
+
+if Health > Health_Max:
+    Health = Health_Max
+
+if Energy > Energy_Max:
+    Energy = Energy_Max
+    
+if Hunger > Hunger_Max:
+    Hunger = Hunger_Max
 
 def show_stats():
     print(f"\n{pet_name}'s Current Stats:")
