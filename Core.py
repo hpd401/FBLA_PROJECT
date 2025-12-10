@@ -27,14 +27,15 @@ def choose_option():
     return pet_type, pet_name
 
 
-
 pet_type, pet_name = choose_option()
 
 # Stats setup & cap 
-Hunger = 75
-Health = 75
-Happiness = 75
-Energy = 75
+stats = get_pet_stats(pet_type)
+
+Hunger = stats["Hunger"]
+Health = stats["Health"]
+Happiness = stats["Happiness"]
+Energy = stats["Energy"]
 
 Hunger_Max = 100
 Health_Max = 100
@@ -65,11 +66,8 @@ def feed_pet():  # this is the 1st action you can do
         print("sorry,you don't have enough dollars")
         return
     Hunger += 10
-    if Hunger > 100:
-        Hunger = 100
     Happiness += 10
-    if Happiness > 100:
-        Happiness = 100
+    Energy +=5
     Dollars -= 5
     print(f"\nYou fed {pet_name}! They look happier already.")
 
@@ -79,13 +77,15 @@ def play_with_pet():  # this is the second one we can do
         print ("Sorry, you dont have enough dollars")
         return
     Happiness += 10
-    if Happiness > 100:
-        Happiness = 100
+    Energy -= 10
     Health += 10
-    if Health > 100:
-        Health = 100
     Dollars -= 5
-    print(f"\nYou played with {pet_name}! They seem full of energy now.")
+    print(f"\nYou played with {pet_name}! They seem more exited than usual.")
+def rest():
+    global Energy, Health
+    Energy += 25
+    Health += 10
+    print(f"\n{pet_name} slept soundly. They look full of energy")
 
 def main():  #dev log3: i accdentaly deleted the 1st devlog but thats ok. this code should fix the problem of the function happening without input so thanks book and google
     while True:
