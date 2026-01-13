@@ -1,3 +1,3 @@
-def get_pet_stats():
-    if pet_type == "Dog":
-        return {"Hunger":}
+# this is an aging system for AI personalities
+Age = 0
+Every action = 1 hour 
