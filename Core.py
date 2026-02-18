@@ -1,6 +1,7 @@
 print("Welcome to snugbit!")  # Opening title card and intro code so we get that pokemon style intro 
 import minigames
 import economy
+from personality_ai import pet_stats
 
 def choose_option():
     print("\nPlease choose your pet:")
@@ -21,8 +22,7 @@ def choose_option():
         pet_type = "Robot"
     else:
         print("Invalid choice. Please choose 1, 2, 3, or 4.")
-      
-        continue 
+        return choose_option()
 
     pet_name = input(f"What would you like to name your {pet_type}? ")
     print(f"\nAwesome! You chose a {pet_type} named {pet_name}!")
@@ -32,7 +32,7 @@ def choose_option():
 pet_type, pet_name = choose_option()
 
 # Stats setup & cap 
-stats = get_pet_stats(pet_type)
+stats = pet_stats(pet_type)
 
 Hunger = stats["Hunger"]
 Health = stats["Health"]
@@ -97,62 +97,22 @@ def main():  #dev log3: i accdentaly deleted the 1st devlog but thats ok. this c
         print("3.show stats")
         print("4. Play a minigame")
         print("5.Quit")
-
-        imp = input("Choose a number:") # if chedder = cheese elif nachos elif tacos else nacho, taco
-
-        if imp == "1":
+        
+        choice = input("\nEnter your choice: ")
+        
+        if choice == '1':
             feed_pet()
-        
-        elif imp == "2":
+        elif choice == '2':
             play_with_pet()
-        
-        elif imp == "3":
+        elif choice == '3':
             show_stats()
-        
-        elif imp == "4":
-            print("choose a minigame!")
-            print("1.Feeding Frenzy")
-            print("2.Trick Time")
-            print("3.Medical Mayhem")
-            print("4.Return")
-            fun_choice = input("choose_a_minigame: ")
-
-            if fun_choice == "1":
-                result = minigames.minigame_hunger()
-                if result:
-                    Hunger = min(Hunger + result.get('hunger', 0), Hunger_Max)
-                    Happiness = min(Happiness + result.get('happiness', 0), Happiness_Max)
-                    economy.Dollars += result.get('dollars', 0)
-                    print(f"\nMinigame results: +{result.get('hunger',0)} Hunger, +{result.get('happiness',0)} Happiness, +${result.get('dollars',0)}")
-                else:
-                    print("\nMinigame cancelled or failed to run.")
-
-            elif fun_choice == "2":
-                result = minigames.minigame_happiness()
-                if result and 'happiness' in result:
-                    Happiness = min(Happiness + result.get('happiness',0), Happiness_Max)
-                    print(f"\nMinigame results: +{result.get('happiness',0)} Happiness")
-
-            elif fun_choice == "3":
-                result = minigames.minigame_health()
-                if result:
-                    Health = min(Health + result.get('health',0), Health_Max)
-                    economy.Dollars += result.get('dollars',0)
-                    print(f"\nMinigame results: +{result.get('health',0)} Health, +${result.get('dollars',0)}")
-            
-            elif fun_choice == "4":
-                pass
-            
-            else:
-                print("invalid choice")
-                continue
-
-        
-        elif imp == "5":
-            print("goodbye")
+        elif choice == '4':
+            print("Minigame selection coming soon!")
+        elif choice == '5':
+            print(f"Thanks for playing with {pet_name}! Goodbye!")
             break
-        
         else:
-            print("invalid choice,choose again")
-            continue
-main()
+            print("Invalid choice. Please try again.")
+
+if __name__ == "__main__":
+    main()

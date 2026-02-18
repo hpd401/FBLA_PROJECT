@@ -31,7 +31,7 @@ def minigame_health(timeout: int = 3) -> Dict[str, int]:
 def minigame_happiness() -> Dict[str, int]:
     
 
-    Press Enter when you see 'NOW'. Returns {'happiness': int}.
+    print("When you see 'NOW' press any button as fast as you can to perform a trick!")
     
     print("Trick Time! Get ready...")
     time.sleep(random.uniform(0.5, 2.0))
@@ -84,12 +84,3 @@ def minigame_hunger(duration: int = 10) -> Dict[str, int]:
     happiness = min(score * 3, 100)
 
     return {'hunger': hunger, 'dollars': dollars, 'happiness': happiness}
-
-
-if __name__ == '__main__':
-    print("Running quick self-test of minigames (no graphics)...")
-    print(minigame_health())
-    print(minigame_happiness())
-    print(minigame_hunger(5))
-
-    

@@ -1,6 +1,5 @@
 # this is an aging system for AI personalities
-def stat_decay
-():
+def stat_decay():
     global Hunger, Health, Happiness, Energy
 
     # Decay rates
@@ -24,3 +23,15 @@ def stat_decay
         Happiness = 0
     if Energy < 0:
         Energy = 0
+
+def pet_stats(pet_type):
+    if pet_type == "Dog":
+        return {"Hunger": 100, "Health": 100, "Happiness": 100, "Energy": 100}
+    elif pet_type == "Cat":
+        return {"Hunger": 90, "Health": 120, "Happiness": 90, "Energy": 80}
+    elif pet_type == "Bird":
+        return {"Hunger": 80, "Health": 85, "Happiness": 110, "Energy": 95}
+    elif pet_type == "Robot":
+        return {"Hunger": 0, "Health": 100, "Happiness": 100, "Energy": 100}
+    else:
+        return {"Hunger": 100, "Health": 100, "Happiness": 100, "Energy": 100}
