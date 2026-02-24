@@ -1,8 +1,9 @@
 # this is an aging system for AI personalities
+import time
+
 def stat_decay():
     global Hunger, Health, Happiness, Energy
-
-    # Decay rates
+    # stat decay works by check time then applying a decay value to each stat every 10 seconds, simulating the passage of time and the need for care and attention from the player. This encourages regular interaction with the pet to maintain its well-being.
     Hunger_decay = 5
     Health_decay = 3
     Happiness_decay = 4  #social battery 

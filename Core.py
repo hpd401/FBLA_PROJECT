@@ -1,8 +1,17 @@
+
 print("Welcome to snugbit!")  # Opening title card and intro code so we get that pokemon style intro 
 import minigames
 import economy
 from personality_ai import pet_stats
-
+class Pet:
+    def __init__(self, pet_type, pet_name):
+        self.pet_type = pet_type
+        self.pet_name = pet_name
+        self.stats = pet_stats(pet_type)
+        self.hunger = self.stats["Hunger"]
+        self.health = self.stats["Health"]
+        self.happiness = self.stats["Happiness"]
+        self.energy = self.stats["Energy"]
 def choose_option():
     print("\nPlease choose your pet:")
     print("1. Dog")   # charmander
@@ -42,10 +51,8 @@ Energy = stats["Energy"]
 Hunger_Max = 100
 Health_Max = 100
 Happiness_Max = 100
-Energy_Max = 100 # I spent four hours coding this, the minigames and the Ageing system then exited and forgot to save so it was all lost ... bruh
-
-if Happiness > Happiness_Max:
-    Happiness = Happiness_Max
+Energy_Max = 100
+Happiness_Max= 100
 
 if Health > Health_Max:
     Health = Health_Max
@@ -56,32 +63,29 @@ if Energy > Energy_Max:
 if Hunger > Hunger_Max:
     Hunger = Hunger_Max
 
+if Happiness > Happiness_Max:
+    Happiness = Happiness_Max
+
 def show_stats():
     print(f"\n{pet_name}'s Current Stats:")
-    print(f"Hunger: {Hunger}") # jeremy has died of hunger
-    print(f"Health: {Health}") # mary sue has died of dysentary
-    print(f"Happiness: {Happiness}") # josh has volentarily consumed a 3x3 inch cube of sodium and died
+    print(f"Hunger: {Hunger}") 
+    print(f"Health: {Health}")
+    print(f"Happiness: {Happiness}") 
 
 def feed_pet():  # this is the 1st action you can do
     global Hunger, Happiness, Energy
-    if economy.Dollars < 5:
-        print("sorry,you don't have enough dollars")
-        return
     Hunger += 10
     Happiness += 10
     Energy +=5
-    economy.Dollars -= 5
-    print(f"\nYou fed {pet_name}! They look happier already.")
+
 
 def play_with_pet():  # this is the second one we can do
     global Happiness, Health, Energy
-    if economy.Dollars < 5:
-        print ("Sorry, you dont have enough dollars")
-        return
+
     Happiness += 10
     Energy -= 10
     Health += 10
-    economy.Dollars -= 5
+
     print(f"\nYou played with {pet_name}! They seem more exited than usual.")
 def rest():
     global Energy, Health
@@ -91,12 +95,12 @@ def rest():
 
 def main():  #dev log3: i accdentaly deleted the 1st devlog but thats ok. this code should fix the problem of the function happening without input so thanks book and google
     while True:
-        print("\nwhat would you like to do?")
-        print(f"\n1.feed {pet_name}")
-        print(f"\n2.play with {pet_name} ")
-        print("3.show stats")
-        print("4. Play a minigame")
-        print("5.Quit")
+        print("What would you like to do?")
+        print(f"1.Feed {pet_name}")
+        print(f"2.Play with {pet_name} ")
+        print(f"3.Show stats")
+        print(f"4.Play a minigame")
+        print(f"5. Quit")
         
         choice = input("\nEnter your choice: ")
         
@@ -115,4 +119,6 @@ def main():  #dev log3: i accdentaly deleted the 1st devlog but thats ok. this c
             print("Invalid choice. Please try again.")
 
 if __name__ == "__main__":
+
+
     main()
