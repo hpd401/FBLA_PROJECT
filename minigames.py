@@ -1,14 +1,11 @@
 #Minigames for Snugbit 
-
-
-
 import time
 import random
 from typing import Dict
 
 
 def minigame_health(timeout: int = 3) -> Dict[str, int]:
-    #Simple quick-time text minigame for medicine.
+    #Simple quick-time minigame for medicine.
     print("Get ready to give the medicine to your pet!")
     print("When you see 'NOW' press Enter as fast as you can.")
     time.sleep(random.uniform(1.0, 3.0))
