@@ -1,6 +1,8 @@
-
+pip install questionary
+pip install tkinter
 print("Welcome to snugbit!")  # Opening title card and intro code so we get that pokemon style intro 
 import minigames
+import questionary
 import economy
 from personality_ai import pet_stats
 class Pet:
@@ -91,28 +93,30 @@ def rest():
     global Energy, Health
     Energy += 25
     Health += 10
-    print(f"\n{pet_name} slept soundly. They look full of energy")
+    print(f"\n{pet_name} slept soundly. They look full of energy"
 
-def main():  #dev log3: i accdentaly deleted the 1st devlog but thats ok. this code should fix the problem of the function happening without input so thanks book and google
+def main():
     while True:
-        print("What would you like to do?")
-        print(f"1.Feed {pet_name}")
-        print(f"2.Play with {pet_name} ")
-        print(f"3.Show stats")
-        print(f"4.Play a minigame")
-        print(f"5. Quit")
+        choice = questionary.select(
+            "What would you like to do?",
+            choices=[
+                f"Feed {pet_name}",
+                f"Play with {pet_name}",
+                "Show stats",
+                "Play a minigame",
+                "Quit"
+            ]
+        ).ask()
         
-        choice = input("\nEnter your choice: ")
-        
-        if choice == '1':
+        if choice == f"Feed {pet_name}":
             feed_pet()
-        elif choice == '2':
+        elif choice == f"Play with {pet_name}":
             play_with_pet()
-        elif choice == '3':
+        elif choice == "Show stats":
             show_stats()
-        elif choice == '4':
+        elif choice == "Play a minigame":
             print("Minigame selection coming soon!")
-        elif choice == '5':
+        elif choice == "Quit":
             print(f"Thanks for playing with {pet_name}! Goodbye!")
             break
         else:
