@@ -12,7 +12,7 @@ class Pet:
         self.health = self.stats["Health"]
         self.happiness = self.stats["Happiness"]
         self.energy = self.stats["Energy"]
-def choose_option():# this can let users choose their pet and name it, As instucted in the guidlines
+def choose_option():# this can let users choose their pet and name it, As instucted in the guidlines 
     print("\nPlease choose your pet:")
     print("1. Dog")   # charmander
     print("2. Cat")   # squirtle
@@ -66,13 +66,15 @@ if Hunger > Hunger_Max:
 if Happiness > Happiness_Max:
     Happiness = Happiness_Max
 
-def show_stats():# This function displays the current stats of the pet to the user
-    print(f"\n{pet_name}'s Current Stats:")
+def show_stats():
+    # display current stats along with wallet info and interest rate
+    print(f"\n--- {pet_name}'s Current Stats ---")
+    print(f"Balance: ${economy.get_balance()} (Interest: {economy.interest_rate*100:.1f}%)")
     print(f"Hunger: {Hunger}") 
     print(f"Health: {Health}")
     print(f"Happiness: {Happiness}") 
 
-def cap_stats():  3# This function ensures that all stats stay within their defined limits (0 to Max)
+def cap_stats():  # This function ensures that all stats stay within their defined limits (0 to Max)
     global Hunger, Health, Happiness, Energy
     Hunger = min(max(0, Hunger), Hunger_Max)
     Health = min(max(0, Health), Health_Max)
@@ -120,22 +122,27 @@ def play_minigame():# This is the minigame function, it allows the user to choos
         result = minigames.minigame_health()
         if 'health' in result:
             Health += result['health']
+        earned = result.get('dollars', 0)
+        if earned:
+            economy.add_dollars(earned, description="Medicine Rush reward")
         print(f"Health increased by {result.get('health', 0)}!")
-        print(f"You also earned ${result.get('dollars', 0)}!")
+        print(f"You also earned ${earned}!")
         cap_stats()
         
     elif minigame_choice == "Trick Performance":
         result = minigames.minigame_happiness()
         Happiness += result.get('happiness', 0)
-        print(f"Happiness increased by {result.get('happiness', 0)}!")
         cap_stats()
         
     elif minigame_choice == "Feeding Frenzy":
         result = minigames.minigame_hunger()
         Hunger = max(0, Hunger - result.get('hunger', 0))
         Happiness += result.get('happiness', 0)
+        earned = result.get('dollars', 0)
+        if earned:
+            economy.add_dollars(earned, description="Feeding Frenzy reward")
         print(f"Hunger decreased by {result.get('hunger', 0)}, Happiness increased!")
-        print(f"You also earned ${result.get('dollars', 0)}!")
+        print(f"You also earned ${earned}!")
         cap_stats()
         
     elif minigame_choice == "Back to main menu":
@@ -158,14 +165,24 @@ def play_minigame():# This is the minigame function, it allows the user to choos
 
 def main():
     while True:
+        # automatically apply configured interest each turn
+        gained = economy.apply_interest()  # uses economy.interest_rate
+        if gained:
+            print(f"\n💤 Passive interest: +${gained} (new balance ${economy.get_balance()})")
+
+        # header showing balance and rate (like top-right corner)
+        print(f"\n[Balance: ${economy.get_balance()} | Interest rate: {economy.interest_rate*100:.1f}%]")
+
         choice = questionary.select(
             "What would you like to do?",
             choices=[
                 f"Feed {pet_name}",
                 f"Play with {pet_name}",
                 "Show stats",
+                "Show wallet",
+                "Collect income",
                 "Play a minigame",
-                "rest",
+                "Rest",
                 "Quit"
             ]
         ).ask()
@@ -176,9 +193,15 @@ def main():
             play_with_pet()
         elif choice == "Show stats":
             show_stats()
+        elif choice == "Show wallet":
+            economy.print_economy_summary()
+        elif choice == "Collect income":
+            # a simple fixed paycheck, could be tied to time or events later
+            amount = economy.give_income(50, description="fixed paycheck")
+            print(f"\nYou received a paycheck of ${amount}!")
         elif choice == "Play a minigame":
             play_minigame()
-        elif choice == "rest":
+        elif choice == "Rest":
             rest()
         elif choice == "Quit":
             print(f"Thanks for playing with {pet_name}! Goodbye!")

@@ -137,7 +137,9 @@ class PetShop:
 # Example usage
 if __name__ == "__main__":
     shop = PetShop(items_per_page=3)
-    player_currency = 500
+    import economy
+    # start with whatever the shared wallet currently has
+    player_currency = economy.get_balance()
 
     print("🐾 Welcome to Pet Sim Shop! 🐾")
 
@@ -146,23 +148,25 @@ if __name__ == "__main__":
         choice = input("Select action: ").strip().lower()
 
         if choice == 'q':
-            print("\n👋 Goodbye! Your pet will miss you!")
+            print("\nGoodbye! Your pet will miss you!")
             break
         elif choice == '<':
             if shop.prev_page():
                 print("⬅️ Previous page\n")
             else:
-                print("⚠️ Already on first page\n")
+                print(" Already on first page\n")
         elif choice == '>':
             if shop.next_page():
-                print("➡️ Next page\n")
+                print("Next page\n")
             else:
-                print("⚠️ Already on last page\n")
+                print("Already on last page\n")
         elif choice in ['1', '2', '3']:
             success, msg, cost = shop.buy_item(int(choice), player_currency)
             if success:
-                player_currency -= cost
+                # deduct from the shared balance and log the expense
+                economy.subtract_dollars(cost, description="Shop purchase")
+                player_currency = economy.get_balance()
             print(f"{msg}\n")
         else:
-            print("⚠️ Invalid input\n")
+            print(" Invalid input\n")
         
