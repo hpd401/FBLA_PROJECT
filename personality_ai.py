@@ -1,21 +1,5 @@
-# this is an aging system for AI personalities
+# this is an algorithem that track actions and assigns a personality nicknamed P.AL for personality algorithem 
 import time
-
-def stat_decay():
-    global Hunger, Health, Happiness, Energy
-    # stat decay works by check time then applying a decay value to each stat every 10 seconds, simulating the passage of time and the need for care and attention from the player. This encourages regular interaction with the pet to maintain its well-being.
-    Hunger_decay = 5
-    Health_decay = 3
-    Happiness_decay = 4  #social battery 
-    Energy_decay = 2
-
-    # Applies decay over time with each action
-    Hunger -= Hunger_decay
-    Health -= Health_decay
-    Happiness -= Happiness_decay
-    Energy -= Energy_decay
-    cap_stats()  
-    
 
 def pet_stats(pet_type):
     if pet_type == "Dog":
@@ -29,17 +13,92 @@ def pet_stats(pet_type):
     else:
         return {"Hunger": 100, "Health": 100, "Happiness": 100, "Energy": 100}
 
-def pet_response():
-
-    pass
+def pet_response(action):
+    personality = assign_personality()
+    if personality == "Nurturing":
+        if action == "feed":
+            return "The pet eagerly accepts the food, showing deep appreciation for your nurturing care."
+        elif action == "play":
+            return "The pet plays gently, valuing the bond you're building."
+        elif action == "clean":
+            return "The pet stays still, trusting your careful cleaning."
+        elif action == "rest":
+            return "The pet rests peacefully, feeling secure in your presence."
+        else:
+            return "The pet appreciates your nurturing attention."
+    elif personality == "Playful":
+        if action == "feed":
+            return "They bounce with excitement, loving the treat and asking for more playtime!"
+        elif action == "play":
+            return "They move energetically, loving the fun and games you share together!"
+        elif action == "clean":
+            return "They squirm playfully, making cleaning a fun and silly experience!"
+        elif action == "rest":
+            return "They reluctantly rest, but dream of the next playful adventure!"
+        else:
+            return "They are always ready for fun and games with you!"
+    elif personality == "Responsible":
+        if action == "feed":
+            return "The pet eats calmly, appreciating the care you take in providing for them."
+        elif action == "play":
+            return "The pet engages in play thoughtfully, enjoying the quality time together."
+        elif action == "clean":
+            return "The pet stays still and cooperative, understanding the importance of cleanliness."
+        elif action == "rest":
+            return "The pet rests quietly, valuing the routine and structure you provide."
+        else:
+            return "The pet appreciates your responsible care and attention."
+    elif personality == "Relaxed":
+        if action == "feed":
+            return "The pet eats slowly, savoring the food and enjoying the moment."
+        elif action == "play":
+            return "The pet plays in a laid-back manner, enjoying the activity without any rush."
+        elif action == "clean":
+            return "The pet tolerates cleaning with a calm demeanor, not minding the process."
+        elif action == "rest":
+            return "The pet rests deeply, feeling completely at ease in your care."
+        else:
+            return "The pet enjoys a relaxed and easygoing relationship with you."
+    elif personality == "Caring":
+        if action == "feed":
+            return "The pet eats with gratitude, showing a strong bond and appreciation for your care."
+        elif action == "play":
+            return "The pet plays with affection, cherishing the time spent together."
+        elif action == "clean":
+            return "The pet stays still and cooperative, trusting your care and attention."
+        elif action == "rest":
+            return "The pet rests peacefully, feeling loved and secure in your presence."
+        else:
+            return "The pet deeply values the caring relationship you share."
+    elif personality == "Energetic":
+        if action == "feed":
+            return "The pet eats quickly, fueled by the energy and excitement you provide!"
+        elif action == "play":
+            return "The pet plays with boundless energy, loving every moment of fun and activity!"
+        elif action == "clean":
+            return "The pet fidgets during cleaning, eager to get back to playing and having fun!"
+        elif action == "rest":
+            return "The pet struggles to rest, always buzzing with energy and ready for the next adventure!"
+        else:
+            return "The pet is full of energy and always ready for fun with you!"
+    elif personality == "Balanced":
+        if action == "feed":
+            return "The pet eats with contentment, enjoying the balance of care and attention you provide."
+        elif action == "play":
+            return "The pet plays with enthusiasm, appreciating the fun and connection you share."
+        elif action == "clean":
+            return "The pet cooperates during cleaning, understanding the importance of care and hygiene."
+        elif action == "rest":
+            return "The pet rests comfortably, feeling secure and well-cared for in your presence."
+        else:
+            return "The pet enjoys a balanced and harmonious relationship with you."
+    else:        return "The pet responds in a unique way, reflecting its individual personality and the care you provide."
 
 # Action tracking for personality assignment
 action_counts = {"feed": 0, "play": 0, "clean": 0, "rest": 0}
 
 def record_action(action):
-    """
-    Records a user action to track behavior patterns.
-    """
+  
     if action in action_counts:
         action_counts[action] += 1
 

@@ -2,7 +2,9 @@ print("Welcome to snugbit!")  # Opening title card and intro code so we get that
 import minigames
 import questionary
 import economy
-from personality_ai import pet_stats
+from personality_ai import pet_stats, pet_response, record_action
+import time
+import threading
 class Pet:
     def __init__(self, pet_type, pet_name):
         self.pet_type = pet_type
@@ -91,13 +93,35 @@ def cap_stats():  # This function ensures that all stats stay within their defin
     Happiness = min(max(0, Happiness), Happiness_Max)
     Energy = min(max(0, Energy), Energy_Max)
 
+def stat_decay():
+    global Hunger, Health, Happiness, Energy
+    # stat decay works by applying a decay value to each stat every 5 minutes, simulating the passage of time and the need for care and attention from the player. This encourages regular interaction with the pet to maintain its well-being.
+    Hunger_decay = 5
+    Health_decay = 3
+    Happiness_decay = 4  #social battery 
+    Energy_decay = 2
+
+    # Applies decay over time
+    Hunger -= Hunger_decay
+    Health -= Health_decay
+    Happiness -= Happiness_decay
+    Energy -= Energy_decay
+    cap_stats()
+    print(f"\n⏰ Time passes... {pet_name}'s stats have decayed slightly.")
+
+def run_decay():
+    while True:
+        time.sleep(300)  # 5 minutes
+        stat_decay()
+
 def feed_pet():  # this is the 1st action you can do
     global Hunger, Happiness, Energy
     Shop_buff()
     Hunger += 10
     Happiness += 10
     Energy +=5
-    print(f"\nYou fed {pet_name}! {pet_response()}")
+    record_action("feed")
+    print(f"\nYou fed {pet_name}! {pet_response('feed')}")
     cap_stats()
 
 
@@ -107,14 +131,16 @@ def play_with_pet():  # this is the second one we can do
     Happiness += 10
     Energy -= 10
     Health += 10
-    print(f"\nYou played with {pet_name}! {pet_response()}")
+    record_action("play")
+    print(f"\nYou played with {pet_name}! {pet_response('play')}")
     cap_stats()
 
 def rest():
     global Energy, Health
     Energy += 25
     Health += 10
-    print(f"\n{pet_name} slept soundly. {pet_response()}")
+    record_action("rest")
+    print(f"\n{pet_name} slept soundly. {pet_response('rest')}")
     cap_stats()
 
 def Clean():
@@ -122,7 +148,8 @@ def Clean():
     Shop_buff()
     Health += 15
     Happiness -= 5
-    print(f"\nYou cleaned {pet_name}. {pet_response()}")
+    record_action("clean")
+    print(f"\nYou cleaned {pet_name}. {pet_response('clean')}")
     cap_stats()
 
 def play_minigame():# This is the minigame function, it allows the user to choose a minigame and then updates the pet's stats based on the results of the minigame.
@@ -184,11 +211,16 @@ def play_minigame():# This is the minigame function, it allows the user to choos
         return
 
 def main():
+    # Start the decay thread
+    decay_thread = threading.Thread(target=run_decay)
+    decay_thread.daemon = True
+    decay_thread.start()
+    
     while True:
         # automatically apply configured interest each turn
         gained = economy.apply_interest()  # uses economy.interest_rate
         if gained:
-            print(f"\n💤 Passive interest: +${gained} (new balance ${economy.get_balance()})")
+            print(f"\nPassive interest: +${gained} (new balance ${economy.get_balance()})")
 
         # header showing balance and rate (like top-right corner)
         print(f"\n[Balance: ${economy.get_balance()} | Interest rate: {economy.interest_rate*100:.1f}%]")
