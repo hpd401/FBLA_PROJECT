@@ -40,7 +40,7 @@ def choose_option():# this can let users choose their pet and name it, As instuc
 
 pet_type, pet_name = choose_option()
 
-# Stats setup & cap 
+# Stats setup & cap as well as minimum 
 stats = pet_stats(pet_type)
 
 Hunger = stats["Hunger"]
@@ -66,6 +66,16 @@ if Hunger > Hunger_Max:
 if Happiness > Happiness_Max:
     Happiness = Happiness_Max
 
+if Happiness < 0:
+    Happiness = 0
+
+if Health < 0: 
+    Health = 0
+if Energy < 0:
+    Energy = 0
+if Hunger < 0:
+    Hunger = 0
+
 def show_stats():
     # display current stats along with wallet info and interest rate
     print(f"\n--- {pet_name}'s Current Stats ---")
@@ -83,26 +93,36 @@ def cap_stats():  # This function ensures that all stats stay within their defin
 
 def feed_pet():  # this is the 1st action you can do
     global Hunger, Happiness, Energy
+    Shop_buff()
     Hunger += 10
     Happiness += 10
     Energy +=5
+    print(f"\nYou fed {pet_name}! {pet_response()}")
     cap_stats()
 
 
 def play_with_pet():  # this is the second one we can do
     global Happiness, Health, Energy
-
+    Shop_buff()
     Happiness += 10
     Energy -= 10
     Health += 10
-
-    print(f"\nYou played with {pet_name}! They seem more exited than usual.")
+    print(f"\nYou played with {pet_name}! {pet_response()}")
     cap_stats()
+
 def rest():
     global Energy, Health
     Energy += 25
     Health += 10
-    print(f"\n{pet_name} slept soundly. They look full of energy")
+    print(f"\n{pet_name} slept soundly. {pet_response()}")
+    cap_stats()
+
+def Clean():
+    global Health, Happiness
+    Shop_buff()
+    Health += 15
+    Happiness -= 5
+    print(f"\nYou cleaned {pet_name}. {pet_response()}")
     cap_stats()
 
 def play_minigame():# This is the minigame function, it allows the user to choose a minigame and then updates the pet's stats based on the results of the minigame.
@@ -178,11 +198,11 @@ def main():
             choices=[
                 f"Feed {pet_name}",
                 f"Play with {pet_name}",
+                f"Rest",
                 "Show stats",
                 "Show wallet",
                 "Collect income",
                 "Play a minigame",
-                "Rest",
                 "Quit"
             ]
         ).ask()
@@ -203,6 +223,8 @@ def main():
             play_minigame()
         elif choice == "Rest":
             rest()
+        elif choice == "Clean":
+            Clean()
         elif choice == "Quit":
             print(f"Thanks for playing with {pet_name}! Goodbye!")
             break

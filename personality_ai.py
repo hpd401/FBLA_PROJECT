@@ -14,16 +14,8 @@ def stat_decay():
     Health -= Health_decay
     Happiness -= Happiness_decay
     Energy -= Energy_decay
-
-    # Ensures stats do not go below zero
-    if Hunger < 0:
-        Hunger = 0
-    if Health < 0:
-        Health = 0
-    if Happiness < 0:
-        Happiness = 0
-    if Energy < 0:
-        Energy = 0
+    cap_stats()  
+    
 
 def pet_stats(pet_type):
     if pet_type == "Dog":
@@ -36,3 +28,45 @@ def pet_stats(pet_type):
         return {"Hunger": 0, "Health": 100, "Happiness": 100, "Energy": 100}
     else:
         return {"Hunger": 100, "Health": 100, "Happiness": 100, "Energy": 100}
+
+def pet_response():
+
+    pass
+
+# Action tracking for personality assignment
+action_counts = {"feed": 0, "play": 0, "clean": 0, "rest": 0}
+
+def record_action(action):
+    """
+    Records a user action to track behavior patterns.
+    """
+    if action in action_counts:
+        action_counts[action] += 1
+
+def assign_personality():
+
+    total_actions = sum(action_counts.values())
+    if total_actions == 0:
+        return "Neutral"  # No actions yet
+    
+    # Calculate percentages
+    feed_ratio = action_counts["feed"] / total_actions
+    play_ratio = action_counts["play"] / total_actions
+    clean_ratio = action_counts["clean"] / total_actions
+    rest_ratio = action_counts["rest"] / total_actions
+    
+    # Personality logic based on dominant actions
+    if feed_ratio > 0.4:
+        return "Nurturing"  # User focuses on feeding
+    elif play_ratio > 0.4:
+        return "Playful"  # User focuses on playing
+    elif clean_ratio > 0.4:
+        return "Responsible"  # User focuses on cleaning
+    elif rest_ratio > 0.4:
+        return "Relaxed"  # User focuses on resting
+    elif feed_ratio > play_ratio and feed_ratio > clean_ratio:
+        return "Caring"
+    elif play_ratio > feed_ratio and play_ratio > clean_ratio:
+        return "Energetic"
+    else:
+        return "Balanced"
