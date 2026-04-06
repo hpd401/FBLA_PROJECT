@@ -1,10 +1,21 @@
-print("Welcome to snugbit!")  # Opening title card and intro code so we get that pokemon style intro 
+import os
+import warnings
+
+# Only use the dummy SDL driver when no display is available.
+# This allows the visual title screen to appear on a normal desktop.
+if "DISPLAY" not in os.environ and os.name != "nt":
+    os.environ['SDL_VIDEODRIVER'] = 'dummy'
+
+warnings.filterwarnings("ignore", message=".*pkg_resources.*")
+import UI
 import minigames
 import questionary
 import economy
 from personality_ai import pet_stats, pet_response, record_action
 import time
 import threading
+import sys
+
 class Pet:
     def __init__(self, pet_type, pet_name):
         self.pet_type = pet_type
@@ -14,59 +25,50 @@ class Pet:
         self.health = self.stats["Health"]
         self.happiness = self.stats["Happiness"]
         self.energy = self.stats["Energy"]
-def choose_option():# this can let users choose their pet and name it, As instucted in the guidlines 
-    print("\nPlease choose your pet:")
-    print("1. Dog")   # charmander
-    print("2. Cat")   # squirtle
-    print("3. Bird")  # bulbasaur
-    print("4. Robot") # pikachu
 
-    choice = input("Enter your choice (1, 2, 3, or 4): ")
- 
-    if choice == '1':
-        pet_type = "Dog"
-    elif choice == '2':
-        pet_type = "Cat"
-    elif choice == '3':
-        pet_type = "Bird"
-    elif choice == '4':
-        pet_type = "Robot"
+title = UI.TitleScreen()
+result = title.run()
+if result == "start_game":
+    pet_type = UI.PetSelection().run()
+    if pet_type == "back":
+        # Go back to title, but for simplicity, exit
+        print("Going back to title.")
+        sys.exit()
     else:
-        print("Invalid choice. Please choose 1, 2, 3, or 4.")
-        return choose_option()
+        pet_name = input(f"What would you like to name your {pet_type}? ")
+        print(f"\nAwesome! You chose a {pet_type} named {pet_name}!")
 
-    pet_name = input(f"What would you like to name your {pet_type}? ")
-    print(f"\nAwesome! You chose a {pet_type} named {pet_name}!")
-    return pet_type, pet_name
+        # Stats setup & cap as well as minimum 
+        stats = pet_stats(pet_type)
 
+        Hunger = stats["Hunger"]
+        Health = stats["Health"]
+        Happiness = stats["Happiness"]
+        Energy = stats["Energy"]
 
-pet_type, pet_name = choose_option()
+        Hunger_Max = 100
+        Health_Max = 100
+        Happiness_Max = 100
+        Energy_Max = 100
+        Happiness_Max= 100
 
-# Stats setup & cap as well as minimum 
-stats = pet_stats(pet_type)
+        if Health > Health_Max:
+            Health = Health_Max
 
-Hunger = stats["Hunger"]
-Health = stats["Health"]
-Happiness = stats["Happiness"]
-Energy = stats["Energy"]
+        if Energy > Energy_Max:
+            Energy = Energy_Max
+            
+        if Hunger > Hunger_Max:
+            Hunger = Hunger_Max
 
-Hunger_Max = 100
-Health_Max = 100
-Happiness_Max = 100
-Energy_Max = 100
-Happiness_Max= 100
+        if Happiness > Happiness_Max:
+            Happiness = Happiness_Max
 
-if Health > Health_Max:
-    Health = Health_Max
-
-if Energy > Energy_Max:
-    Energy = Energy_Max
-    
-if Hunger > Hunger_Max:
-    Hunger = Hunger_Max
-
-if Happiness > Happiness_Max:
-    Happiness = Happiness_Max
+        # Now create the pet
+        my_pet = Pet(pet_type, pet_name)
+        # ... continue with game loop or whatever
+elif result == "quit":
+    sys.exit()
 
 if Happiness < 0:
     Happiness = 0
