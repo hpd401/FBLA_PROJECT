@@ -277,18 +277,17 @@ class HubScreen:
         sprite = self.get_current_sprite()
         return pygame.Rect(self.pet_x, self.pet_y, sprite.get_width(), sprite.get_height())
 
-    def get_current_sprite(self):
+    def get_animation_frames(self):
         if self.walking:
             if self.direction == 'right':
-                frames = self.animations.get('walk_right', self.animations['idle'])
-            else:
-                frames = self.animations.get('walk_left', self.animations['idle'])
-        else:
-            frames = self.animations.get('idle', [])
+                return self.animations.get('walk_right', self.animations.get('idle', []))
+            return self.animations.get('walk_left', self.animations.get('idle', []))
+        return self.animations.get('idle', [])
 
+    def get_current_sprite(self):
+        frames = self.get_animation_frames()
         if not frames:
             return pygame.Surface((64, 64), pygame.SRCALPHA)
-
         return frames[self.current_frame % len(frames)]
 
     def handle_input(self):
@@ -316,9 +315,10 @@ class HubScreen:
     def update(self, dt):
         if self.walking:
             self.frame_timer += dt
-            if self.frame_timer > 120:
+            frames = self.get_animation_frames()
+            if self.frame_timer > 120 and frames:
                 self.frame_timer = 0
-                self.current_frame = (self.current_frame + 1) % len(self.get_current_sprite())
+                self.current_frame = (self.current_frame + 1) % len(frames)
 
     def get_current_spot(self):
         pet_rect = self.get_pet_rect()

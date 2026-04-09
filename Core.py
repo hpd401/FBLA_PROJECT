@@ -14,6 +14,8 @@ import questionary
 import economy
 import UI
 import animatons
+import pygame
+import minigames
 from personality_ai import pet_stats, pet_response, record_action
 
 
@@ -95,7 +97,6 @@ def clean_pet(state):
 
 
 def play_minigame(state):
-    result = minigames.minigame_health() if False else None
     chosen = questionary.select(
         'Which minigame would you like to play?',
         choices=['Medicine Rush', 'Trick Performance', 'Feeding Frenzy', 'Back to hub']
