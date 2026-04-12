@@ -1080,6 +1080,10 @@ class HubScreen:
         pygame.event.clear()  # Clear input buffer to prevent stale inputs
         running = True
         tutorial_waiting = False
+        minigame_result = None
+        minigame_result_time = 0
+        minigame_result_duration = 2000  # 2 seconds in milliseconds
+        
         # Reset pet to starting position
         self.pet_x = 200
         self.pet_y = 300
@@ -1089,6 +1093,11 @@ class HubScreen:
         
         while running:
             dt = clock.tick(60)
+            current_time = pygame.time.get_ticks()
+            
+            # Auto-close minigame results after duration
+            if minigame_result and (current_time - minigame_result_time) > minigame_result_duration:
+                minigame_result = None
             
             # Check for completion screen in tutorial
             if self.tutorial and self.tutorial.is_finished() and tutorial_waiting:
@@ -1119,7 +1128,8 @@ class HubScreen:
                             self.message = "Fullscreen OFF"
                     elif event.key == pygame.K_e:
                         spot = self.get_current_spot()
-                        if spot:
+                        # Check cooldown before allowing action
+                        if spot and self.can_perform_action():
                             # Determine which reaction to show based on action
                             if spot['name'] == 'Feed':
                                 self.reaction_animator.add_reaction(ReactionType.EATING, 40)
@@ -1134,6 +1144,11 @@ class HubScreen:
                             
                             result = on_action(spot['name'])
                             self.message = result or self.message
+                            minigame_result = result
+                            minigame_result_time = current_time
+                            
+                            # Record action time for cooldown
+                            self.perform_action()
                             
                             # Clear input buffer after minigames to prevent stale inputs from affecting movement
                             if spot['name'] == 'Mini Game':
@@ -1156,6 +1171,15 @@ class HubScreen:
                 prev_x, prev_y = self.pet_x, self.pet_y
             
             self.draw(state)
+            
+            # Draw minigame result notification
+            if minigame_result:
+                result_surf = self.font.render(minigame_result, True, (100, 255, 100))
+                result_rect = result_surf.get_rect(center=(self.width // 2, 120))
+                result_bg = result_rect.inflate(20, 10)
+                pygame.draw.rect(self.screen, (0, 0, 0), result_bg)
+                pygame.draw.rect(self.screen, (100, 255, 100), result_bg, 2)
+                self.screen.blit(result_surf, result_rect)
             
             # Draw tutorial overlay
             if self.tutorial:
