@@ -203,13 +203,13 @@ class PetSelection:
         rect = pet_data['rect']
         color = pet_data['highlight_color'] if is_hovered else pet_data['color']
         
-        # Card background with gradient effect
-        pygame.draw.rect(self.screen, color, rect, border_radius=15)
+        # Card background
+        pygame.draw.rect(self.screen, color, rect)
         
         # Border
         border_color = self.GOLD if is_hovered else self.WHITE
         border_width = 4 if is_hovered else 2
-        pygame.draw.rect(self.screen, border_color, rect, border_width, border_radius=15)
+        pygame.draw.rect(self.screen, border_color, rect, border_width)
         
         # Pet emoji/icon
         emoji_text = pygame.font.Font(None, 100).render(pet_data['emoji'], True, self.WHITE)
@@ -244,7 +244,7 @@ class PetSelection:
         # Hover animation - add frame border pulse
         if is_hovered:
             pulse = abs(self.animation_timer % 20 - 10) / 5.0
-            pygame.draw.rect(self.screen, self.GOLD, rect, int(border_width + pulse), border_radius=15)
+            pygame.draw.rect(self.screen, self.GOLD, rect, int(border_width + pulse))
 
     def run(self):
         if not hasattr(self, 'display_available') or not self.display_available:
