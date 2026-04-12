@@ -225,7 +225,7 @@ def main():
 
     if title.display_available and pet_choice_screen.display_available:
         pygame.init()
-        screen = pygame.display.set_mode((800, 600))
+        screen = pygame.display.set_mode((800, 600), pygame.FULLSCREEN)
         pygame.display.set_caption('Snugbit Hub')
         animations = animatons.load_pet_animation(state.pet_type)
         pet_shop = store.PetShop()

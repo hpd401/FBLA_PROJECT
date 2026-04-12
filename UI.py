@@ -326,15 +326,17 @@ class PetNamingScreen:
 class ShopScreen:
     """Visual shop interface for purchasing pet items"""
     def __init__(self, screen_width=1000, screen_height=700, pet_shop=None):
-        pygame.init()
         self.screen_width = screen_width
         self.screen_height = screen_height
         self.pet_shop = pet_shop
         try:
-            self.screen = pygame.display.set_mode((self.screen_width, self.screen_height))
+            self.screen = pygame.display.get_surface()
+            if self.screen is None:
+                self.screen = pygame.display.set_mode((self.screen_width, self.screen_height))
             pygame.display.set_caption("Pet Shop")
             self.display_available = True
-            self.is_fullscreen = False
+            self.is_fullscreen = True
+            self.screen = pygame.display.set_mode((self.screen_width, self.screen_height), pygame.FULLSCREEN)
 
             self.BLACK = (0, 0, 0)
             self.WHITE = (255, 255, 255)
@@ -514,8 +516,6 @@ class ShopScreen:
             
             pygame.display.flip()
             clock.tick(60)
-        
-        pygame.quit()
 
 
 class InteractiveTutorialScreen:
@@ -935,14 +935,16 @@ class HubScreen:
 class MinigameSelectionScreen:
     """Visual minigame selection screen"""
     def __init__(self, screen_width=900, screen_height=700):
-        pygame.init()
         self.screen_width = screen_width
         self.screen_height = screen_height
         try:
-            self.screen = pygame.display.set_mode((self.screen_width, self.screen_height))
+            self.screen = pygame.display.get_surface()
+            if self.screen is None:
+                self.screen = pygame.display.set_mode((self.screen_width, self.screen_height))
             pygame.display.set_caption("Choose a Minigame")
             self.display_available = True
-            self.is_fullscreen = False
+            self.is_fullscreen = True
+            self.screen = pygame.display.set_mode((self.screen_width, self.screen_height), pygame.FULLSCREEN)
 
             self.BLACK = (0, 0, 0)
             self.WHITE = (255, 255, 255)
@@ -1113,7 +1115,6 @@ class MinigameSelectionScreen:
             pygame.display.flip()
             clock.tick(60)
         
-        pygame.quit()
         return selected if selected else 'minigame_hunger'
 
 
