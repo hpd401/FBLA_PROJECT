@@ -155,7 +155,8 @@ class PetSelection:
                     'traits': 'Loves to play, very friendly',
                     'stats': '❤️ Health: High | ⚡ Energy: High | 😊 Happiness: High',
                     'rect': pygame.Rect(50, 150, 250, 380),
-                    'key': pygame.K_1
+                    'key': pygame.K_1,
+                    'key_name': '1'
                 },
                 {
                     'name': 'Cat',
@@ -166,7 +167,8 @@ class PetSelection:
                     'traits': 'Aloof but affectionate',
                     'stats': '❤️ Health: Medium | ⚡ Energy: Low | 😊 Happiness: Medium',
                     'rect': pygame.Rect(375, 150, 250, 380),
-                    'key': pygame.K_2
+                    'key': pygame.K_2,
+                    'key_name': '2'
                 },
                 {
                     'name': 'Bird',
@@ -177,7 +179,8 @@ class PetSelection:
                     'traits': 'Playful and talkative',
                     'stats': '❤️ Health: Medium | ⚡ Energy: Very High | 😊 Happiness: Very High',
                     'rect': pygame.Rect(700, 150, 250, 380),
-                    'key': pygame.K_3
+                    'key': pygame.K_3,
+                    'key_name': '3'
                 },
                 {
                     'name': 'Robot',
@@ -188,7 +191,8 @@ class PetSelection:
                     'traits': 'Advanced AI companion',
                     'stats': '❤️ Health: Very High | ⚡ Energy: Unlimited | 😊 Happiness: Quirky',
                     'rect': pygame.Rect(1025, 150, 250, 380),
-                    'key': pygame.K_4
+                    'key': pygame.K_4,
+                    'key_name': '4'
                 },
             ]
 
@@ -237,7 +241,7 @@ class PetSelection:
         self.screen.blit(stats_text, stats_rect)
         
         # Keyboard hint
-        key_hint = self.button_font.render(f"Press {pet_data['key'].name[-1]}", True, self.WHITE)
+        key_hint = self.button_font.render(f"Press {pet_data['key_name']}", True, self.WHITE)
         key_hint_rect = key_hint.get_rect(center=(rect.centerx, rect.y + 350))
         self.screen.blit(key_hint, key_hint_rect)
         
