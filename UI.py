@@ -847,7 +847,7 @@ class HubScreen:
         self.tutorial = tutorial
         self.pet_x = 200
         self.pet_y = 300
-        self.speed = 4
+        self.speed = 6
         self.direction = 'right'
         self.walking = False
         self.frame_timer = 0
@@ -876,8 +876,8 @@ class HubScreen:
             {'name': 'Shop', 'x': 750, 'y': 450, 'type': 'shop', 'label': 'Pet Shop'},
         ]
         
-        # Exit button in top-right corner
-        self.exit_button = pygame.Rect(self.width - 120, 20, 100, 40)
+        # Exit button positioned below stats panel
+        self.exit_button = pygame.Rect(self.width - 255, 105, 245, 30)
 
     def get_pet_rect(self):
         sprite = self.get_current_sprite()
@@ -903,7 +903,9 @@ class HubScreen:
 
     def handle_input(self):
         keys = pygame.key.get_pressed()
+        prev_walking = self.walking
         self.walking = False
+        
         if keys[pygame.K_LEFT] or keys[pygame.K_a]:
             self.pet_x -= self.speed
             self.direction = 'left'
@@ -924,17 +926,19 @@ class HubScreen:
         sprite = self.get_current_sprite()
         self.pet_x = max(0, min(self.pet_x, self.width - sprite.get_width()))
         self.pet_y = max(0, min(self.pet_y, self.height - sprite.get_height()))
+        
+        # Reset animation when starting to walk or changing direction
+        if self.walking and not prev_walking:
+            self.frame_timer = 0
+            self.current_frame = 0
 
     def update(self, dt):
         if self.walking:
             self.frame_timer += dt
             frames = self.get_animation_frames()
-            if self.frame_timer > 60 and frames:  # Reduced from 120ms to 60ms for smoother animation
+            if self.frame_timer > 100 and frames:  # 100ms per frame for smooth animation
                 self.frame_timer = 0
                 self.current_frame = (self.current_frame + 1) % len(frames)
-        else:
-            self.frame_timer = 0
-            self.current_frame = 0
         
         self.animation_timer += 1
         self.reaction_animator.update()
@@ -1059,10 +1063,10 @@ class HubScreen:
         hint = self.small_font.render('Move with arrow keys • Press E to interact', True, (240, 240, 240))
         self.screen.blit(hint, (28, 65))
         
-        # Exit button in top-right corner
-        pygame.draw.rect(self.screen, (200, 100, 100), self.exit_button)
-        pygame.draw.rect(self.screen, (255, 255, 255), self.exit_button, 2)
-        exit_text = self.button_font.render('Exit (ESC)', True, (255, 255, 255))
+        # Exit button below stats
+        pygame.draw.rect(self.screen, (150, 50, 50), self.exit_button)
+        pygame.draw.rect(self.screen, (255, 100, 100), self.exit_button, 2)
+        exit_text = self.small_font.render('❌ Exit to Menu (ESC)', True, (255, 255, 255))
         exit_text_rect = exit_text.get_rect(center=self.exit_button.center)
         self.screen.blit(exit_text, exit_text_rect)
         
@@ -1182,10 +1186,6 @@ class HubScreen:
                             
                             # Record action time for cooldown
                             self.perform_action()
-                            
-                            # Clear input buffer after minigames to prevent stale inputs from affecting movement
-                            if spot['name'] == 'Mini Game':
-                                pygame.event.clear()
                             
                             # Check tutorial action requirement
                             if self.tutorial and not self.tutorial.is_finished():

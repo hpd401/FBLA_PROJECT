@@ -74,6 +74,7 @@ def minigame_health(timeout: int = 3, screen=None, is_fullscreen=False) -> Dict[
                     if original_screen is None:
                         pygame.quit()
                         sys.exit()
+                    pygame.event.clear()
                     return {'health': 10, 'dollars': 10}
                 elif event.type == pygame.KEYDOWN or event.type == pygame.MOUSEBUTTONDOWN:
                     if state == "show_now":
@@ -169,6 +170,7 @@ def minigame_health(timeout: int = 3, screen=None, is_fullscreen=False) -> Dict[
         print(f"Visual medicine minigame failed: {e}")
         if original_screen is None:
             pygame.quit()
+        pygame.event.clear()
         return {'health': 10, 'dollars': 10}
 
 
@@ -384,6 +386,7 @@ def minigame_happiness(screen=None, is_fullscreen=False) -> Dict[str, int]:
         print(f"Simon Says minigame failed: {e}")
         if original_screen is None:
             pygame.quit()
+        pygame.event.clear()
         return {'happiness': 10}
 
 
@@ -428,6 +431,7 @@ def minigame_hunger(duration: int = 15, screen=None, is_fullscreen=False) -> Dic
                     if original_screen is None:
                         pygame.quit()
                         sys.exit()
+                    pygame.event.clear()
                     return {'hunger': 0, 'dollars': 0, 'happiness': 0}
 
             keys = pygame.key.get_pressed()
