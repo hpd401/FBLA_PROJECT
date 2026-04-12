@@ -841,6 +841,10 @@ class HubScreen:
         self.reaction_animator = ReactionAnimator()
         self.animation_timer = 0
         self.is_fullscreen = start_fullscreen
+        
+        # Action cooldown system - prevent spamming actions
+        self.last_action_time = 0
+        self.action_cooldown = 2000  # 2 seconds in milliseconds
 
         # Interactive areas with better positioning and names
         self.action_spots = [
@@ -999,6 +1003,21 @@ class HubScreen:
         hunger_text = pygame.font.Font(None, 16).render(f"🍖 Hunger: {int(state.hunger)}", True, (200, 150, 100))
         self.screen.blit(hunger_text, (panel_x, panel_y + 62))
 
+    def can_perform_action(self):
+        """Check if enough time has passed for another action"""
+        current_time = pygame.time.get_ticks()
+        return current_time - self.last_action_time >= self.action_cooldown
+
+    def perform_action(self):
+        """Record that an action was just performed"""
+        self.last_action_time = pygame.time.get_ticks()
+
+    def get_cooldown_remaining(self):
+        """Get remaining cooldown time in seconds"""
+        current_time = pygame.time.get_ticks()
+        remaining = self.action_cooldown - (current_time - self.last_action_time)
+        return max(0, remaining / 1000.0)
+
     def draw(self, state=None):
         """Draw the hub screen with optional state for stats display"""
         # Background
@@ -1036,14 +1055,20 @@ class HubScreen:
         # Draw interaction prompt
         spot = self.get_current_spot()
         if spot:
-            prompt = self.font.render(f"Press E to {spot['name']}", True, (255, 255, 200))
-            prompt_rect = prompt.get_rect(center=(self.width // 2, self.height - 40))
-            
-            # Highlight box
-            highlight = prompt_rect.inflate(20, 10)
-            pygame.draw.rect(self.screen, (0, 0, 0), highlight)
-            pygame.draw.rect(self.screen, (255, 255, 100), highlight, 2)
-            self.screen.blit(prompt, prompt_rect)
+            # Check if action is on cooldown
+            if not self.can_perform_action():
+                cooldown_text = self.font.render(f"Action on cooldown: {self.get_cooldown_remaining():.1f}s", True, (255, 100, 100))
+                cooldown_rect = cooldown_text.get_rect(center=(self.width // 2, self.height - 40))
+                self.screen.blit(cooldown_text, cooldown_rect)
+            else:
+                prompt = self.font.render(f"Press E to {spot['name']}", True, (255, 255, 200))
+                prompt_rect = prompt.get_rect(center=(self.width // 2, self.height - 40))
+                
+                # Highlight box
+                highlight = prompt_rect.inflate(20, 10)
+                pygame.draw.rect(self.screen, (0, 0, 0), highlight)
+                pygame.draw.rect(self.screen, (255, 255, 100), highlight, 2)
+                self.screen.blit(prompt, prompt_rect)
 
         # Draw current message
         if self.message and self.message != 'Use arrow keys to move. Press E to interact.':
