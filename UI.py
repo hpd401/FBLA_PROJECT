@@ -5,12 +5,12 @@ from visual_reactions import ReactionAnimator, ReactionType
 
 
 class TitleScreen:
-    def __init__(self, screen_width=1920, screen_height=1080, start_fullscreen=True):
+    def __init__(self, screen_width=1280, screen_height=720, start_fullscreen=False):
         self.screen_width = screen_width
         self.screen_height = screen_height
         try:
             flag = pygame.FULLSCREEN if start_fullscreen else 0
-            self.screen = pygame.display.set_mode((self.screen_width, self.screen_height), flag)
+            self.screen = pygame.display.set_mode((self.screen_width, self.screen_height), flag, vsync=1)
             pygame.display.set_caption('Snugbit - Virtual Pet Game')
             self.display_available = True
             self.is_fullscreen = start_fullscreen
@@ -111,12 +111,12 @@ class TitleScreen:
 
 
 class PetSelection:
-    def __init__(self, screen_width=1920, screen_height=1080, start_fullscreen=True):
+    def __init__(self, screen_width=1280, screen_height=720, start_fullscreen=False):
         self.screen_width = screen_width
         self.screen_height = screen_height
         try:
             flag = pygame.FULLSCREEN if start_fullscreen else 0
-            self.screen = pygame.display.set_mode((self.screen_width, self.screen_height), flag)
+            self.screen = pygame.display.set_mode((self.screen_width, self.screen_height), flag, vsync=1)
             pygame.display.set_caption('Choose Your Pet')
             self.display_available = True
             self.is_fullscreen = start_fullscreen
@@ -215,13 +215,13 @@ class PetSelection:
 
 
 class PetNamingScreen:
-    def __init__(self, screen_width=1920, screen_height=1080, pet_type='Dog', start_fullscreen=True):
+    def __init__(self, screen_width=1280, screen_height=720, pet_type='Dog', start_fullscreen=False):
         self.screen_width = screen_width
         self.screen_height = screen_height
         self.pet_type = pet_type
         try:
             flag = pygame.FULLSCREEN if start_fullscreen else 0
-            self.screen = pygame.display.set_mode((self.screen_width, self.screen_height), flag)
+            self.screen = pygame.display.set_mode((self.screen_width, self.screen_height), flag, vsync=1)
             pygame.display.set_caption('Name Your Pet')
             self.display_available = True
             self.is_fullscreen = start_fullscreen

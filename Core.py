@@ -201,15 +201,19 @@ def run_text_menu(state):
 
 
 def main():
+    pygame.init()
+    
     title = UI.TitleScreen()
     result = title.run()
     if result == 'quit':
+        pygame.quit()
         sys.exit()
 
     pet_choice_screen = UI.PetSelection()
     pet_type = pet_choice_screen.run()
     if pet_type == 'back':
         print('Going back to title.')
+        pygame.quit()
         sys.exit()
 
     pet_naming_screen = UI.PetNamingScreen(pet_type=pet_type)
@@ -224,8 +228,7 @@ def main():
     decay_thread.start()
 
     if title.display_available and pet_choice_screen.display_available:
-        pygame.init()
-        screen = pygame.display.set_mode((800, 600), pygame.FULLSCREEN)
+        screen = pygame.display.set_mode((800, 600), vsync=1)
         pygame.display.set_caption('Snugbit Hub')
         animations = animatons.load_pet_animation(state.pet_type)
         pet_shop = store.PetShop()
@@ -247,6 +250,7 @@ def main():
         pygame.quit()
     else:
         print('\nNo graphical display detected. Starting the text-based hub instead.')
+        pygame.quit()
         run_text_menu(state)
 
 
