@@ -186,6 +186,326 @@ class PetSelection:
         return selected_pet
 
 
+class PetNamingScreen:
+    def __init__(self, screen_width=800, screen_height=600, pet_type='Dog'):
+        pygame.init()
+        self.screen_width = screen_width
+        self.screen_height = screen_height
+        self.pet_type = pet_type
+        try:
+            self.screen = pygame.display.set_mode((self.screen_width, self.screen_height))
+            pygame.display.set_caption('Name Your Pet')
+            self.display_available = True
+
+            self.BLACK = (0, 0, 0)
+            self.WHITE = (255, 255, 255)
+            self.BLUE = (0, 0, 255)
+            self.GREEN = (0, 255, 0)
+            self.YELLOW = (255, 255, 0)
+            self.LIGHT_BLUE = (173, 216, 230)
+            
+            self.title_font = pygame.font.Font(None, 60)
+            self.text_font = pygame.font.Font(None, 40)
+            self.button_font = pygame.font.Font(None, 32)
+            
+            self.pet_name = ""
+            self.cursor_visible = True
+            self.cursor_timer = 0
+            
+        except Exception:
+            self.display_available = False
+
+    def draw_button(self, rect, text, color):
+        pygame.draw.rect(self.screen, color, rect)
+        pygame.draw.rect(self.screen, self.WHITE, rect, 3)
+        text_surf = self.button_font.render(text, True, self.BLACK)
+        text_rect = text_surf.get_rect(center=rect.center)
+        self.screen.blit(text_surf, text_rect)
+
+    def draw_input_box(self):
+        """Draw the text input box with decorative border"""
+        box_width = 300
+        box_height = 60
+        box_x = self.screen_width // 2 - box_width // 2
+        box_y = self.screen_height // 2 - 30
+        
+        # Outer decorative box
+        pygame.draw.rect(self.screen, self.LIGHT_BLUE, (box_x - 10, box_y - 10, box_width + 20, box_height + 20))
+        
+        # Inner input box
+        pygame.draw.rect(self.screen, self.WHITE, (box_x, box_y, box_width, box_height))
+        pygame.draw.rect(self.screen, self.YELLOW, (box_x, box_y, box_width, box_height), 3)
+        
+        # Render text
+        display_text = self.pet_name
+        if self.cursor_visible:
+            display_text += "|"
+        
+        text_surf = self.text_font.render(display_text, True, self.BLACK)
+        text_rect = text_surf.get_rect(center=(self.screen_width // 2, box_y + box_height // 2))
+        self.screen.blit(text_surf, text_rect)
+
+    def run(self):
+        if not hasattr(self, 'display_available') or not self.display_available:
+            print('No display available, using default name.')
+            return 'Pet'
+        
+        clock = pygame.time.Clock()
+        start_time = pygame.time.get_ticks()
+        running = True
+        
+        while running:
+            current_time = pygame.time.get_ticks()
+            if current_time - start_time > 30000:  # 30 seconds timeout
+                running = False
+                if not self.pet_name:
+                    self.pet_name = 'Pet'
+
+            # Update cursor blink
+            self.cursor_timer += 1
+            if self.cursor_timer > 30:
+                self.cursor_visible = not self.cursor_visible
+                self.cursor_timer = 0
+
+            self.screen.fill((50, 100, 150))
+            
+            # Title
+            title = self.title_font.render('Name Your Pet', True, self.WHITE)
+            title_rect = title.get_rect(center=(self.screen_width // 2, 80))
+            self.screen.blit(title, title_rect)
+            
+            # Subtitle with pet type
+            subtitle_font = pygame.font.Font(None, 36)
+            subtitle = subtitle_font.render(f'Your {self.pet_type}', True, self.YELLOW)
+            subtitle_rect = subtitle.get_rect(center=(self.screen_width // 2, 150))
+            self.screen.blit(subtitle, subtitle_rect)
+            
+            # Draw input box
+            self.draw_input_box()
+            
+            # Instructions
+            hint_font = pygame.font.Font(None, 24)
+            hint = hint_font.render('Type a name (1-20 characters)', True, self.WHITE)
+            hint_rect = hint.get_rect(center=(self.screen_width // 2, self.screen_height // 2 + 80))
+            self.screen.blit(hint, hint_rect)
+            
+            # Buttons
+            confirm_button = pygame.Rect(self.screen_width // 2 - 200, self.screen_height - 120, 150, 50)
+            skip_button = pygame.Rect(self.screen_width // 2 + 50, self.screen_height - 120, 150, 50)
+            
+            self.draw_button(confirm_button, 'Confirm', self.GREEN)
+            self.draw_button(skip_button, 'Skip', self.BLUE)
+
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    pygame.quit()
+                    sys.exit()
+                elif event.type == pygame.MOUSEBUTTONDOWN:
+                    if confirm_button.collidepoint(event.pos) and self.pet_name:
+                        running = False
+                    elif skip_button.collidepoint(event.pos):
+                        if not self.pet_name:
+                            self.pet_name = 'Pet'
+                        running = False
+                elif event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_RETURN:
+                        if self.pet_name:
+                            running = False
+                    elif event.key == pygame.K_BACKSPACE:
+                        self.pet_name = self.pet_name[:-1]
+                    elif event.unicode.isalnum() or event.unicode == ' ':
+                        if len(self.pet_name) < 20:
+                            self.pet_name += event.unicode
+
+            pygame.display.flip()
+            clock.tick(60)
+
+        pygame.quit()
+        return self.pet_name if self.pet_name else 'Pet'
+
+class ShopScreen:
+    """Visual shop interface for purchasing pet items"""
+    def __init__(self, screen_width=1000, screen_height=700, pet_shop=None):
+        pygame.init()
+        self.screen_width = screen_width
+        self.screen_height = screen_height
+        self.pet_shop = pet_shop
+        try:
+            self.screen = pygame.display.set_mode((self.screen_width, self.screen_height))
+            pygame.display.set_caption("Pet Shop")
+            self.display_available = True
+
+            self.BLACK = (0, 0, 0)
+            self.WHITE = (255, 255, 255)
+            self.DARK_GRAY = (50, 50, 50)
+            self.LIGHT_GRAY = (200, 200, 200)
+            self.GOLD = (255, 215, 0)
+            self.GREEN = (100, 200, 100)
+            self.RED = (200, 100, 100)
+            
+            self.title_font = pygame.font.Font(None, 50)
+            self.item_font = pygame.font.Font(None, 28)
+            self.button_font = pygame.font.Font(None, 24)
+            
+            self.player_currency = 1000
+            self.selected_item = 0
+            self.scroll_offset = 0
+            self.items_per_page = 3
+            
+        except Exception:
+            self.display_available = False
+
+    def draw_item_card(self, item, x, y, width, height, item_num):
+        """Draw a visual item card"""
+        # Card background
+        pygame.draw.rect(self.screen, self.DARK_GRAY, (x, y, width, height))
+        pygame.draw.rect(self.screen, self.GOLD, (x, y, width, height), 3)
+        
+        # Item type icon
+        icon_data = {
+            'food': '🍖',
+            'toy': '🎾',
+            'bed': '🛏️'
+        }
+        icon_text = self.item_font.render(icon_data.get(item.item_type, '?'), True, self.GOLD)
+        self.screen.blit(icon_text, (x + 15, y + 15))
+        
+        # Item name
+        name_text = self.item_font.render(item.name, True, self.WHITE)
+        self.screen.blit(name_text, (x + 60, y + 15))
+        
+        # Description
+        desc_font = pygame.font.Font(None, 18)
+        desc_text = desc_font.render(item.description[:40], True, self.LIGHT_GRAY)
+        self.screen.blit(desc_text, (x + 15, y + 50))
+        
+        # Cost
+        cost_text = self.button_font.render(f"${item.cost}", True, self.GOLD)
+        self.screen.blit(cost_text, (x + 15, y + 80))
+        
+        # Owned count
+        owned_text = self.button_font.render(f"Owned: {item.owned}", True, self.GREEN)
+        self.screen.blit(owned_text, (x + width - 200, y + 80))
+        
+        # Multiplier
+        mult = item.get_total_multiplier()
+        mult_color = self.GREEN if mult > 1 else self.LIGHT_GRAY
+        mult_text = self.button_font.render(f"Multiplier: {mult:.2f}x", True, mult_color)
+        self.screen.blit(mult_text, (x + 15, y + height - 35))
+        
+        # Highlight selection
+        if self.selected_item == item_num:
+            pygame.draw.rect(self.screen, self.GOLD, (x, y, width, height), 5)
+        
+        # Buy button
+        buy_button = pygame.Rect(x + width - 120, y + height - 50, 100, 40)
+        button_color = self.GREEN if self.player_currency >= item.cost else self.RED
+        pygame.draw.rect(self.screen, button_color, buy_button)
+        pygame.draw.rect(self.screen, self.WHITE, buy_button, 2)
+        buy_text = self.button_font.render("Buy", True, self.BLACK)
+        self.screen.blit(buy_text, buy_text.get_rect(center=buy_button.center))
+        
+        return buy_button
+
+    def run(self, on_purchase=None):
+        if not hasattr(self, 'display_available') or not self.display_available:
+            print('No display available, skipping shop.')
+            return
+
+        if not self.pet_shop:
+            print('No shop data available.')
+            return
+
+        clock = pygame.time.Clock()
+        running = True
+        buy_buttons = []
+        
+        while running:
+            self.screen.fill(self.BLACK)
+            
+            # Header
+            pygame.draw.rect(self.screen, (50, 100, 150), (0, 0, self.screen_width, 100))
+            title = self.title_font.render("🐾 Pet Shop 🐾", True, self.WHITE)
+            title_rect = title.get_rect(center=(self.screen_width // 2, 35))
+            self.screen.blit(title, title_rect)
+            
+            # Currency display
+            currency_text = self.button_font.render(f"💰 Currency: ${self.player_currency}", True, self.GOLD)
+            self.screen.blit(currency_text, (20, 62))
+            
+            # Page info
+            total_pages = max(1, (len(self.pet_shop.items) + self.items_per_page - 1) // self.items_per_page)
+            current_page = (self.pet_shop.current_page if self.pet_shop else 0) + 1
+            page_text = self.button_font.render(f"Page {current_page}/{total_pages}", True, self.LIGHT_GRAY)
+            self.screen.blit(page_text, (self.screen_width - 300, 62))
+            
+            # Draw items
+            if self.pet_shop:
+                page_items = self.pet_shop.get_page_items()
+                buy_buttons = []
+                
+                for idx, key in enumerate(page_items):
+                    item = self.pet_shop.items[key]
+                    x = 40
+                    y = 120 + idx * 160
+                    width = self.screen_width - 80
+                    height = 140
+                    
+                    buy_btn = self.draw_item_card(item, x, y, width, height, idx)
+                    buy_buttons.append((buy_btn, key, item))
+            
+            # Navigation buttons
+            nav_y = self.screen_height - 80
+            prev_button = pygame.Rect(40, nav_y, 100, 50)
+            next_button = pygame.Rect(self.screen_width - 140, nav_y, 100, 50)
+            quit_button = pygame.Rect(self.screen_width // 2 - 75, nav_y, 150, 50)
+            
+            # Draw navigation buttons
+            for btn, label in [(prev_button, "<Prev"), (next_button, "Next>"), (quit_button, "Exit Shop")]:
+                btn_color = self.GOLD if label != "Exit Shop" else self.RED
+                pygame.draw.rect(self.screen, btn_color, btn)
+                pygame.draw.rect(self.screen, self.WHITE, btn, 2)
+                text = self.button_font.render(label, True, self.BLACK)
+                self.screen.blit(text, text.get_rect(center=btn.center))
+            
+            # Event handling
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    running = False
+                elif event.type == pygame.MOUSEBUTTONDOWN:
+                    if quit_button.collidepoint(event.pos):
+                        running = False
+                    elif prev_button.collidepoint(event.pos):
+                        if self.pet_shop:
+                            self.pet_shop.prev_page()
+                    elif next_button.collidepoint(event.pos):
+                        if self.pet_shop:
+                            self.pet_shop.next_page()
+                    else:
+                        # Check if any buy button was clicked
+                        for btn, item_key, item in buy_buttons:
+                            if btn.collidepoint(event.pos):
+                                if self.player_currency >= item.cost:
+                                    self.player_currency -= item.cost
+                                    item.owned += 1
+                                    if on_purchase:
+                                        on_purchase(item_key, item)
+                elif event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_ESCAPE:
+                        running = False
+                    elif event.key == pygame.K_LEFT:
+                        if self.pet_shop:
+                            self.pet_shop.prev_page()
+                    elif event.key == pygame.K_RIGHT:
+                        if self.pet_shop:
+                            self.pet_shop.next_page()
+            
+            pygame.display.flip()
+            clock.tick(60)
+        
+        pygame.quit()
+
+
 class TutorialScreen:
     def __init__(self, screen, steps):
         self.screen = screen
@@ -256,8 +576,8 @@ class HubScreen:
         self.pet_name = pet_name
         self.pet_type = pet_type
         self.animations = animations
-        self.pet_x = 120
-        self.pet_y = self.height - 160
+        self.pet_x = 200
+        self.pet_y = 300
         self.speed = 4
         self.direction = 'right'
         self.walking = False
@@ -265,14 +585,19 @@ class HubScreen:
         self.current_frame = 0
         self.message = 'Use arrow keys to move. Press E to interact.'
         self.font = pygame.font.Font(None, 28)
+        self.small_font = pygame.font.Font(None, 20)
         self.title_font = pygame.font.Font(None, 40)
+        self.reaction_animator = ReactionAnimator()
+        self.animation_timer = 0
 
+        # Interactive areas with better positioning and names
         self.action_spots = [
-            {'name': 'Feed', 'rect': pygame.Rect(100, 420, 120, 120), 'color': (230, 180, 90), 'label': 'Food Bowl'},
-            {'name': 'Play', 'rect': pygame.Rect(300, 360, 140, 140), 'color': (160, 220, 180), 'label': 'Play Area'},
-            {'name': 'Rest', 'rect': pygame.Rect(520, 420, 120, 120), 'color': (140, 170, 240), 'label': 'Bed'},
-            {'name': 'Clean', 'rect': pygame.Rect(620, 180, 120, 120), 'color': (220, 200, 220), 'label': 'Bath'},
-            {'name': 'Mini Game', 'rect': pygame.Rect(100, 180, 140, 120), 'color': (255, 140, 140), 'label': 'Mini Game'},
+            {'name': 'Feed', 'x': 120, 'y': 450, 'type': 'food_bowl', 'label': 'Food Bowl'},
+            {'name': 'Water', 'x': 220, 'y': 450, 'type': 'water_bowl', 'label': 'Water Bowl'},
+            {'name': 'Play', 'x': 400, 'y': 380, 'type': 'play', 'label': 'Play Area'},
+            {'name': 'Rest', 'x': 600, 'y': 450, 'type': 'bed', 'label': 'Bed'},
+            {'name': 'Clean', 'x': 700, 'y': 300, 'type': 'bath', 'label': 'Bath Station'},
+            {'name': 'Mini Game', 'x': 100, 'y': 250, 'type': 'minigame', 'label': 'Mini Game'},
         ]
 
     def get_pet_rect(self):
@@ -328,39 +653,96 @@ class HubScreen:
             if self.frame_timer > 120 and frames:
                 self.frame_timer = 0
                 self.current_frame = (self.current_frame + 1) % len(frames)
+        
+        self.animation_timer += 1
+        self.reaction_animator.update()
 
     def get_current_spot(self):
         pet_rect = self.get_pet_rect()
+        pet_center = (pet_rect.centerx, pet_rect.centery)
+        
+        # Check distance to each spot
         for spot in self.action_spots:
-            if spot['rect'].colliderect(pet_rect):
+            dist_x = pet_center[0] - spot['x']
+            dist_y = pet_center[1] - spot['y']
+            distance = (dist_x**2 + dist_y**2) ** 0.5
+            if distance < 80:  # Interaction radius
                 return spot
         return None
 
+    def draw_action_spot(self, spot):
+        """Draw interactive area with appropriate visual representation"""
+        spot_type = spot['type']
+        x, y = spot['x'], spot['y']
+        
+        if spot_type == 'food_bowl':
+            visual_reactions.draw_bowl(self.screen, x, y, 'food', 0.6)
+        elif spot_type == 'water_bowl':
+            visual_reactions.draw_bowl(self.screen, x, y, 'water', 0.8)
+        elif spot_type == 'play':
+            visual_reactions.draw_play_area(self.screen, x, y, self.animation_timer)
+        elif spot_type == 'bed':
+            visual_reactions.draw_bed(self.screen, x, y, 0.5)
+        elif spot_type == 'bath':
+            visual_reactions.draw_bath_station(self.screen, x, y, 0.7)
+        elif spot_type == 'minigame':
+            visual_reactions.draw_minigame_screen(self.screen, x, y, "Mini Game")
+        
+        # Draw label
+        label = self.small_font.render(spot['label'], True, (255, 255, 255))
+        label_rect = label.get_rect(center=(x, y + 50))
+        
+        # Draw label background for visibility
+        bg_rect = label_rect.inflate(10, 6)
+        pygame.draw.rect(self.screen, (0, 0, 0), bg_rect)
+        pygame.draw.rect(self.screen, (100, 100, 100), bg_rect, 1)
+        self.screen.blit(label, label_rect)
+
     def draw(self):
+        # Background
         self.screen.fill((90, 180, 210))
+        
+        # Ground
         pygame.draw.rect(self.screen, (100, 180, 100), (0, self.height - 160, self.width, 160))
+        
+        # Top header
         pygame.draw.rect(self.screen, (70, 130, 180), (0, 0, self.width, 100))
 
+        # Title and pet name
         title = self.title_font.render(f"{self.pet_name}'s Home", True, (255, 255, 255))
-        self.screen.blit(title, (28, 20))
-        hint = self.font.render('Walk to a spot and press E to interact', True, (240, 240, 240))
-        self.screen.blit(hint, (28, 68))
+        self.screen.blit(title, (28, 15))
+        
+        # Instructions
+        hint = self.small_font.render('Move with arrow keys • Press E to interact', True, (240, 240, 240))
+        self.screen.blit(hint, (28, 65))
 
+        # Draw all interactive areas
         for spot in self.action_spots:
-            pygame.draw.rect(self.screen, spot['color'], spot['rect'])
-            label = self.font.render(spot['label'], True, (20, 20, 20))
-            self.screen.blit(label, label.get_rect(center=spot['rect'].center))
+            self.draw_action_spot(spot)
 
+        # Draw pet with visual reactions overlay
         pet_sprite = self.get_current_sprite()
         self.screen.blit(pet_sprite, (self.pet_x, self.pet_y))
+        
+        # Draw reactions
+        self.reaction_animator.draw(self.screen, self.pet_x, self.pet_y, 64, 64)
 
+        # Draw interaction prompt
         spot = self.get_current_spot()
         if spot:
-            prompt = self.font.render(f"Press E to {spot['name']}", True, (255, 255, 255))
-            self.screen.blit(prompt, (28, self.height - 120))
+            prompt = self.font.render(f"Press E to {spot['name']}", True, (255, 255, 200))
+            prompt_rect = prompt.get_rect(center=(self.width // 2, self.height - 40))
+            
+            # Highlight box
+            highlight = prompt_rect.inflate(20, 10)
+            pygame.draw.rect(self.screen, (0, 0, 0), highlight)
+            pygame.draw.rect(self.screen, (255, 255, 100), highlight, 2)
+            self.screen.blit(prompt, prompt_rect)
 
-        message = self.font.render(self.message, True, (255, 255, 255))
-        self.screen.blit(message, (28, self.height - 90))
+        # Draw current message
+        if self.message and self.message != 'Use arrow keys to move. Press E to interact.':
+            msg = self.small_font.render(self.message, True, (255, 200, 100))
+            self.screen.blit(msg, (28, self.height - 90))
 
     def run(self, on_action):
         clock = pygame.time.Clock()
@@ -376,6 +758,18 @@ class HubScreen:
                     elif event.key == pygame.K_e:
                         spot = self.get_current_spot()
                         if spot:
+                            # Determine which reaction to show based on action
+                            if spot['name'] == 'Feed':
+                                self.reaction_animator.add_reaction(ReactionType.EATING, 40)
+                            elif spot['name'] == 'Play':
+                                self.reaction_animator.add_reaction(ReactionType.PLAYING, 40)
+                            elif spot['name'] == 'Rest':
+                                self.reaction_animator.add_reaction(ReactionType.TIRED, 40)
+                            elif spot['name'] == 'Clean':
+                                self.reaction_animator.add_reaction(ReactionType.HEALTHY, 40)
+                            else:
+                                self.reaction_animator.add_reaction(ReactionType.HAPPY, 40)
+                            
                             result = on_action(spot['name'])
                             self.message = result or self.message
             self.handle_input()
@@ -385,7 +779,184 @@ class HubScreen:
         return
 
 
-if __name__ == '__main__':
+class MinigameSelectionScreen:
+    """Visual minigame selection screen"""
+    def __init__(self, screen_width=900, screen_height=700):
+        pygame.init()
+        self.screen_width = screen_width
+        self.screen_height = screen_height
+        try:
+            self.screen = pygame.display.set_mode((self.screen_width, self.screen_height))
+            pygame.display.set_caption("Choose a Minigame")
+            self.display_available = True
+
+            self.BLACK = (0, 0, 0)
+            self.WHITE = (255, 255, 255)
+            self.DARK_BLUE = (30, 60, 150)
+            self.LIGHT_BLUE = (100, 150, 255)
+            self.GOLD = (255, 215, 0)
+            self.GREEN = (100, 200, 100)
+            
+            self.title_font = pygame.font.Font(None, 56)
+            self.game_font = pygame.font.Font(None, 36)
+            self.desc_font = pygame.font.Font(None, 24)
+            
+            # Define minigames
+            self.minigames = [
+                {
+                    'name': 'Treat Catch',
+                    'icon': '🎾',
+                    'description': 'Catch falling treats in a basket!',
+                    'reward': '⭐ Increase Hunger',
+                    'difficulty': 'Medium'
+                },
+                {
+                    'name': 'Trick Time',
+                    'icon': '✨',
+                    'description': 'Test your reflexes!',
+                    'reward': '💚 Increase Happiness',
+                    'difficulty': 'Easy'
+                },
+                {
+                    'name': 'Medicine Rush',
+                    'icon': '💊',
+                    'description': 'Administer medicine quickly!',
+                    'reward': '🏥 Increase Health',
+                    'difficulty': 'Hard'
+                },
+            ]
+            
+            self.selected_game = 0
+            
+        except Exception:
+            self.display_available = False
+
+    def draw_game_card(self, game, x, y, width, height, is_selected):
+        """Draw a minigame selection card"""
+        # Card background
+        bg_color = self.LIGHT_BLUE if is_selected else self.DARK_BLUE
+        pygame.draw.rect(self.screen, bg_color, (x, y, width, height))
+        
+        # Border
+        border_color = self.GOLD if is_selected else self.WHITE
+        border_width = 4 if is_selected else 2
+        pygame.draw.rect(self.screen, border_color, (x, y, width, height), border_width)
+        
+        # Game icon
+        icon_text = self.game_font.render(game['icon'], True, self.GOLD)
+        icon_rect = icon_text.get_rect(center=(x + width // 2, y + 40))
+        self.screen.blit(icon_text, icon_rect)
+        
+        # Game name
+        name_text = self.game_font.render(game['name'], True, self.WHITE)
+        name_rect = name_text.get_rect(center=(x + width // 2, y + 90))
+        self.screen.blit(name_text, name_rect)
+        
+        # Description
+        desc_text = self.desc_font.render(game['description'], True, (200, 200, 255))
+        desc_rect = desc_text.get_rect(center=(x + width // 2, y + 130))
+        self.screen.blit(desc_text, desc_rect)
+        
+        # Reward info
+        reward_surf = self.desc_font.render(game['reward'], True, self.GREEN)
+        reward_rect = reward_surf.get_rect(center=(x + width // 2, y + 170))
+        self.screen.blit(reward_surf, reward_rect)
+        
+        # Difficulty
+        diff_color = {
+            'Easy': (100, 255, 100),
+            'Medium': (255, 255, 100),
+            'Hard': (255, 100, 100)
+        }.get(game['difficulty'], (150, 150, 150))
+        
+        diff_text = self.desc_font.render(f"Difficulty: {game['difficulty']}", True, diff_color)
+        diff_rect = diff_text.get_rect(center=(x + width // 2, y + height - 30))
+        self.screen.blit(diff_text, diff_rect)
+
+    def run(self):
+        if not hasattr(self, 'display_available') or not self.display_available:
+            print('No display available, defaulting to first game.')
+            return 'minigame_hunger'
+
+        clock = pygame.time.Clock()
+        running = True
+        selected = None
+        
+        while running:
+            self.screen.fill(self.BLACK)
+            
+            # Header
+            pygame.draw.rect(self.screen, (50, 100, 200), (0, 0, self.screen_width, 100))
+            title = self.title_font.render("🎮 Choose Your Game", True, self.WHITE)
+            title_rect = title.get_rect(center=(self.screen_width // 2, 40))
+            self.screen.blit(title, title_rect)
+            
+            # Draw game cards
+            card_width = 250
+            card_height = 220
+            spacing = 30
+            total_width = len(self.minigames) * card_width + (len(self.minigames) - 1) * spacing
+            start_x = (self.screen_width - total_width) // 2
+            
+            card_rects = []
+            for idx, game in enumerate(self.minigames):
+                x = start_x + idx * (card_width + spacing)
+                y = 150
+                self.draw_game_card(game, x, y, card_width, card_height, idx == self.selected_game)
+                card_rects.append(pygame.Rect(x, y, card_width, card_height))
+            
+            # Instructions
+            hint = self.desc_font.render("Use arrow keys to select • Press ENTER to play • ESC to cancel", True, (200, 200, 200))
+            hint_rect = hint.get_rect(center=(self.screen_width // 2, self.screen_height - 80))
+            self.screen.blit(hint, hint_rect)
+            
+            # Play button hint
+            if self.selected_game < len(self.minigames):
+                play_hint = self.game_font.render("► PLAY", True, self.GOLD)
+                play_rect = play_hint.get_rect(center=(self.screen_width // 2, self.screen_height - 30))
+                self.screen.blit(play_hint, play_rect)
+            
+            # Event handling
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    running = False
+                elif event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_LEFT:
+                        self.selected_game = (self.selected_game - 1) % len(self.minigames)
+                    elif event.key == pygame.K_RIGHT:
+                        self.selected_game = (self.selected_game + 1) % len(self.minigames)
+                    elif event.key == pygame.K_RETURN:
+                        # Map game selection to minigame functions
+                        game_map = {
+                            0: 'minigame_hunger',
+                            1: 'minigame_happiness',
+                            2: 'minigame_health'
+                        }
+                        selected = game_map.get(self.selected_game, 'minigame_hunger')
+                        running = False
+                    elif event.key == pygame.K_ESCAPE:
+                        running = False
+                elif event.type == pygame.MOUSEBUTTONDOWN:
+                    for idx, rect in enumerate(card_rects):
+                        if rect.collidepoint(event.pos):
+                            self.selected_game = idx
+                            game_map = {
+                                0: 'minigame_hunger',
+                                1: 'minigame_happiness',
+                                2: 'minigame_health'
+                            }
+                            selected = game_map.get(self.selected_game, 'minigame_hunger')
+                            running = False
+                            break
+            
+            pygame.display.flip()
+            clock.tick(60)
+        
+        pygame.quit()
+        return selected if selected else 'minigame_hunger'
+
+
+
     title = TitleScreen()
     result = title.run()
     print(result)
