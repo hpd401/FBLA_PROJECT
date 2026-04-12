@@ -1060,6 +1060,10 @@ class HubScreen:
                             result = on_action(spot['name'])
                             self.message = result or self.message
                             
+                            # Clear input buffer after minigames to prevent stale inputs from affecting movement
+                            if spot['name'] == 'Mini Game':
+                                pygame.event.clear()
+                            
                             # Check tutorial action requirement
                             if self.tutorial and not self.tutorial.is_finished():
                                 action_name = spot['name'].lower() if spot['name'] != 'Mini Game' else 'minigame'
