@@ -34,7 +34,6 @@ def minigame_health(timeout: int = 3, screen=None, is_fullscreen=False) -> Dict[
             print("Too slow. The pet got the medicine late.")
             return {'health': -5, 'dollars': 5}
 
-    screen = None
     original_screen = screen
     try:
         pygame.init()
@@ -135,18 +134,18 @@ def minigame_health(timeout: int = 3, screen=None, is_fullscreen=False) -> Dict[
                 if reaction_time < 0.8:
                     result = "🟢 PERFECT! Medicine given on time!"
                     result_color = green
-                    health_reward = 20
-                    dollars_reward = 20
+                    health_reward = 40
+                    dollars_reward = 40
                 elif reaction_time < 1.6:
                     result = "🟡 GOOD! Medicine was a bit late."
                     result_color = yellow
-                    health_reward = 10
-                    dollars_reward = 10
+                    health_reward = 20
+                    dollars_reward = 20
                 else:
                     result = "🔴 TOO SLOW! Pet was sick longer."
                     result_color = red
-                    health_reward = -5
-                    dollars_reward = 5
+                    health_reward = 0
+                    dollars_reward = 10
 
                 result_text = font_medium.render(result, True, result_color)
                 result_rect = result_text.get_rect(center=(screen_width // 2, 480))
@@ -200,7 +199,7 @@ def minigame_happiness(screen=None, is_fullscreen=False) -> Dict[str, int]:
                 return {'happiness': 5 + correct_presses * 3}
             correct_presses += 1
         
-        return {'happiness': 20}
+        return {'happiness': 40}
 
     original_screen = screen
     try:
@@ -392,7 +391,6 @@ def minigame_hunger(duration: int = 15, screen=None, is_fullscreen=False) -> Dic
         print("Pygame not available. Using console fallback for hunger minigame.")
         return _minigame_hunger_fallback(duration)
 
-    screen = None
     original_screen = screen
     try:
         pygame.init()
@@ -466,9 +464,9 @@ def minigame_hunger(duration: int = 15, screen=None, is_fullscreen=False) -> Dic
             clock.tick(60)
 
         print(f"You caught {score} treats!")
-        hunger = min(10 + score * 8, 100)
-        dollars = score * 3
-        happiness = min(score * 4, 100)
+        hunger = min(20 + score * 10, 100)
+        dollars = score * 5
+        happiness = min(score * 5, 100)
         return {'hunger': hunger, 'dollars': dollars, 'happiness': happiness}
     except Exception:
         print("Graphical game failed, falling back to console hunger minigame.")

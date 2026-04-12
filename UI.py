@@ -954,7 +954,53 @@ class HubScreen:
         pygame.draw.rect(self.screen, (100, 100, 100), bg_rect, 1)
         self.screen.blit(label, label_rect)
 
-    def draw(self):
+    def draw_stat_bar(self, x, y, width, height, current, max_val, label, color):
+        """Draw a stat bar with label"""
+        # Background
+        pygame.draw.rect(self.screen, (50, 50, 50), (x, y, width, height))
+        pygame.draw.rect(self.screen, (100, 100, 100), (x, y, width, height), 1)
+        
+        # Fill
+        if max_val > 0:
+            fill_width = int(width * (current / max_val))
+        else:
+            fill_width = 0
+        pygame.draw.rect(self.screen, color, (x, y, fill_width, height))
+        
+        # Label and value
+        stat_text = self.small_font.render(f"{label}: {int(current)}/{int(max_val)}", True, (255, 255, 255))
+        self.screen.blit(stat_text, (x + 5, y - 18))
+
+    def draw_stats_panel(self, state):
+        """Draw stats and wallet panel in top right"""
+        import economy
+        
+        panel_x = self.width - 250
+        panel_y = 10
+        
+        # Stats background
+        pygame.draw.rect(self.screen, (40, 40, 80), (panel_x - 10, panel_y, 260, 80))
+        pygame.draw.rect(self.screen, (100, 150, 200), (panel_x - 10, panel_y, 260, 80), 2)
+        
+        # Wallet/Balance
+        wallet_text = self.small_font.render(f"💰 ${economy.get_balance()}", True, (255, 215, 0))
+        self.screen.blit(wallet_text, (panel_x, panel_y + 5))
+        
+        # Interest rate
+        interest_text = pygame.font.Font(None, 16).render(f"Interest: {economy.interest_rate * 100:.1f}%", True, (200, 200, 100))
+        self.screen.blit(interest_text, (panel_x, panel_y + 28))
+        
+        # Mini stat indicators
+        stats_info = f"H:{int(state.health)} |  Ha:{int(state.happiness)} |  E:{int(state.energy)}"
+        mini_stats = pygame.font.Font(None, 16).render(stats_info, True, (200, 200, 200))
+        self.screen.blit(mini_stats, (panel_x, panel_y + 45))
+        
+        # Hunger indicator  
+        hunger_text = pygame.font.Font(None, 16).render(f"🍖 Hunger: {int(state.hunger)}", True, (200, 150, 100))
+        self.screen.blit(hunger_text, (panel_x, panel_y + 62))
+
+    def draw(self, state=None):
+        """Draw the hub screen with optional state for stats display"""
         # Background
         self.screen.fill((90, 180, 210))
         
@@ -971,6 +1017,10 @@ class HubScreen:
         # Instructions
         hint = self.small_font.render('Move with arrow keys • Press E to interact', True, (240, 240, 240))
         self.screen.blit(hint, (28, 65))
+        
+        # Draw stats panel if state is provided
+        if state:
+            self.draw_stats_panel(state)
 
         # Draw all interactive areas
         for spot in self.action_spots:
@@ -1000,7 +1050,7 @@ class HubScreen:
             msg = self.small_font.render(self.message, True, (255, 200, 100))
             self.screen.blit(msg, (28, self.height - 90))
 
-    def run(self, on_action):
+    def run(self, on_action, state=None):
         clock = pygame.time.Clock()
         pygame.event.clear()  # Clear input buffer to prevent stale inputs
         running = True
@@ -1022,7 +1072,7 @@ class HubScreen:
                         running = False
                     elif event.type == pygame.KEYDOWN or event.type == pygame.MOUSEBUTTONDOWN:
                         tutorial_waiting = False
-                self.draw()
+                self.draw(state)
                 self.tutorial.draw_overlay()
                 pygame.display.flip()
                 continue
@@ -1080,7 +1130,7 @@ class HubScreen:
                         self.tutorial.advance_step()
                 prev_x, prev_y = self.pet_x, self.pet_y
             
-            self.draw()
+            self.draw(state)
             
             # Draw tutorial overlay
             if self.tutorial:

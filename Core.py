@@ -32,6 +32,22 @@ class GameState:
 
         self.max_value = 100
         self.min_value = 0
+        
+        # Action cooldown system (in seconds)
+        self.action_cooldowns = {
+            'feed': 3,
+            'water': 3,
+            'play': 5,
+            'rest': 5,
+            'clean': 3,
+        }
+        self.last_action_time = {
+            'feed': 0,
+            'water': 0,
+            'play': 0,
+            'rest': 0,
+            'clean': 0,
+        }
 
     def cap_stats(self):
         self.hunger = min(max(self.hunger, self.min_value), self.max_value)
@@ -46,6 +62,26 @@ class GameState:
         print(f"Health: {self.health}")
         print(f"Happiness: {self.happiness}")
         print(f"Energy: {self.energy}")
+
+    def is_action_on_cooldown(self, action_name):
+        """Check if an action is still on cooldown."""
+        if action_name not in self.last_action_time:
+            return False
+        elapsed = time.time() - self.last_action_time[action_name]
+        return elapsed < self.action_cooldowns.get(action_name, 0)
+
+    def get_cooldown_remaining(self, action_name):
+        """Get remaining cooldown time in seconds."""
+        if action_name not in self.last_action_time:
+            return 0
+        elapsed = time.time() - self.last_action_time[action_name]
+        remaining = self.action_cooldowns.get(action_name, 0) - elapsed
+        return max(0, remaining)
+
+    def record_action(self, action_name):
+        """Record that an action was performed, setting its cooldown."""
+        if action_name in self.last_action_time:
+            self.last_action_time[action_name] = time.time()
 
 
 def stat_decay(state):
@@ -132,18 +168,39 @@ def collect_income():
 
 
 def handle_hub_action(action_name, state, pet_shop=None, screen=None, is_fullscreen=False):
+    # Map action names to cooldown keys
+    action_cooldown_map = {
+        'Feed': 'feed',
+        'Water': 'water',
+        'Play': 'play',
+        'Rest': 'rest',
+        'Clean': 'clean',
+    }
+    
+    cooldown_key = action_cooldown_map.get(action_name)
+    
+    # Check cooldown for basic actions (not minigames or shop)
+    if cooldown_key and state.is_action_on_cooldown(cooldown_key):
+        remaining = state.get_cooldown_remaining(cooldown_key)
+        return f"⏱️ {action_name} is on cooldown for {remaining:.1f}s"
+    
     if action_name == 'Feed':
+        state.record_action('feed')
         return feed_pet(state)
     if action_name == 'Water':
+        state.record_action('water')
         state.hunger = max(0, state.hunger - 15)
         record_action('water')
         state.cap_stats()
         return f"You gave {state.pet_name} water! {pet_response('water', state.pet_name)}"
     if action_name == 'Play':
+        state.record_action('play')
         return play_with_pet(state)
     if action_name == 'Rest':
+        state.record_action('rest')
         return rest(state)
     if action_name == 'Clean':
+        state.record_action('clean')
         return clean_pet(state)
     if action_name == 'Mini Game':
         return play_minigame(state, screen=screen, is_fullscreen=is_fullscreen)
@@ -256,7 +313,7 @@ def main():
         hub = UI.HubScreen(screen, state.pet_name, state.pet_type, animations, tutorial=interactive_tutorial, start_fullscreen=fullscreen_state)
         def hub_action_callback(action):
             return handle_hub_action(action, state, pet_shop, screen=screen, is_fullscreen=hub.is_fullscreen)
-        hub.run(hub_action_callback)
+        hub.run(hub_action_callback, state)
         pygame.quit()
     else:
         print('\nNo graphical display detected. Starting the text-based hub instead.')
