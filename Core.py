@@ -16,6 +16,7 @@ import UI
 import animatons
 import pygame
 import minigames
+import store
 from personality_ai import pet_stats, pet_response, record_action
 
 
@@ -97,12 +98,10 @@ def clean_pet(state):
 
 
 def play_minigame(state):
-    chosen = questionary.select(
-        'Which minigame would you like to play?',
-        choices=['Medicine Rush', 'Trick Performance', 'Feeding Frenzy', 'Back to hub']
-    ).ask()
+    minigame_selection = UI.MinigameSelectionScreen()
+    chosen_game = minigame_selection.run()
 
-    if chosen == 'Medicine Rush':
+    if chosen_game == 'minigame_health':
         result = minigames.minigame_health()
         state.health += result.get('health', 0)
         earned = result.get('dollars', 0)
@@ -110,20 +109,20 @@ def play_minigame(state):
             economy.add_dollars(earned, description='Medicine Rush reward')
         state.cap_stats()
         return f"Medicine Rush completed! Health +{result.get('health', 0)}, earned ${earned}."
-    elif chosen == 'Trick Performance':
+    elif chosen_game == 'minigame_happiness':
         result = minigames.minigame_happiness()
         state.happiness += result.get('happiness', 0)
         state.cap_stats()
         return f"Trick Performance completed! Happiness +{result.get('happiness', 0)}."
-    elif chosen == 'Feeding Frenzy':
+    elif chosen_game == 'minigame_hunger':
         result = minigames.minigame_hunger()
         state.hunger = max(0, state.hunger - result.get('hunger', 0))
         state.happiness += result.get('happiness', 0)
         earned = result.get('dollars', 0)
         if earned:
-            economy.add_dollars(earned, description='Feeding Frenzy reward')
+            economy.add_dollars(earned, description='Treat Catch reward')
         state.cap_stats()
-        return f"Feeding Frenzy completed! Hunger -{result.get('hunger', 0)}, earned ${earned}."
+        return f"Treat Catch completed! Hunger -{result.get('hunger', 0)}, earned ${earned}."
     return 'Back to the hub.'
 
 
@@ -132,7 +131,7 @@ def collect_income():
     return f'You received a paycheck of ${amount}!'
 
 
-def handle_hub_action(action_name, state):
+def handle_hub_action(action_name, state, pet_shop=None):
     if action_name == 'Feed':
         return feed_pet(state)
     if action_name == 'Play':
@@ -143,7 +142,20 @@ def handle_hub_action(action_name, state):
         return clean_pet(state)
     if action_name == 'Mini Game':
         return play_minigame(state)
+    if action_name == 'Shop':
+        return visit_shop(pet_shop)
     return None
+
+
+def visit_shop(pet_shop):
+    """Open the visual shop screen"""
+    if pet_shop is None:
+        return "Shop is temporarily closed."
+    shop_screen = UI.ShopScreen(pet_shop=pet_shop)
+    shop_screen.player_currency = economy.get_balance()
+    shop_screen.run()
+    economy.set_balance(shop_screen.player_currency)
+    return "Thanks for visiting the shop!"
 
 
 def run_text_menu(state):
@@ -200,7 +212,8 @@ def main():
         print('Going back to title.')
         sys.exit()
 
-    pet_name = input(f'What would you like to name your {pet_type}? ')
+    pet_naming_screen = UI.PetNamingScreen(pet_type=pet_type)
+    pet_name = pet_naming_screen.run()
     print(f'\nAwesome! You chose a {pet_type} named {pet_name}!')
 
     state = GameState(pet_type, pet_name)
@@ -215,18 +228,22 @@ def main():
         screen = pygame.display.set_mode((800, 600))
         pygame.display.set_caption('Snugbit Hub')
         animations = animatons.load_pet_animation(state.pet_type)
-        tutorial_steps = [
-            'Use the arrow keys or WASD to move your pet around.',
-            'Walk to the food bowl to feed your pet.',
-            'Walk to the play area to make your pet happy.',
-            'Walk to the bed to rest, or the bath to clean your pet.',
-            'Press E when you are standing on a spot to perform that action.',
+        pet_shop = store.PetShop()
+        
+        # Interactive tutorial with action requirements
+        tutorial_steps_with_actions = [
+            ('Use the arrow keys or WASD to move your pet around.', 'move'),
+            ('Walk to the food bowl and press E to feed your pet.', 'feed'),
+            ('Walk to the play area and press E to play.', 'play'),
+            ('Walk to the bed or bath and press E to interact.', 'rest'),  # rest or clean
+            ('Walk to the shop and press E to visit!', 'shop'),
+            ('You can now explore the hub freely! Press E to perform actions.', 'minigame'),
         ]
-        tutorial = UI.TutorialScreen(screen, tutorial_steps)
-        tutorial.run()
-
-        hub = UI.HubScreen(screen, state.pet_name, state.pet_type, animations)
-        hub.run(lambda action: handle_hub_action(action, state))
+        
+        interactive_tutorial = UI.InteractiveTutorialScreen(screen, tutorial_steps_with_actions)
+        
+        hub = UI.HubScreen(screen, state.pet_name, state.pet_type, animations, tutorial=interactive_tutorial)
+        hub.run(lambda action: handle_hub_action(action, state, pet_shop))
         pygame.quit()
     else:
         print('\nNo graphical display detected. Starting the text-based hub instead.')

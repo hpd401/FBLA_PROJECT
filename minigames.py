@@ -151,7 +151,6 @@ def minigame_health(timeout: int = 3) -> Dict[str, int]:
                 # Wait 2 seconds then exit
                 if state == "timeout":
                     if pygame.time.get_ticks() - (now_shown_time if now_shown_time else wait_start) > 5000:
-                        pygame.quit()
                         return {'health': health_reward, 'dollars': dollars_reward}
 
             pygame.display.flip()
@@ -159,9 +158,7 @@ def minigame_health(timeout: int = 3) -> Dict[str, int]:
 
     except Exception as e:
         print(f"Visual medicine minigame failed: {e}")
-        if screen is not None:
-            pygame.quit()
-        # Fallback
+        # Fallback (don't quit pygame, just return)
         return {'health': 10, 'dollars': 10}
 
 
@@ -318,7 +315,6 @@ def minigame_happiness() -> Dict[str, int]:
                 # Wait 2 seconds then exit
                 if state == "timeout":
                     if pygame.time.get_ticks() - (now_shown_time if now_shown_time else wait_start) > 5000:
-                        pygame.quit()
                         return {'happiness': happiness_reward}
 
             pygame.display.flip()
@@ -326,9 +322,7 @@ def minigame_happiness() -> Dict[str, int]:
 
     except Exception as e:
         print(f"Visual trick minigame failed: {e}")
-        if screen is not None:
-            pygame.quit()
-        # Fallback
+        # Fallback (don't quit pygame, just return)
         return {'happiness': 10}
 
 
@@ -405,16 +399,12 @@ def minigame_hunger(duration: int = 15) -> Dict[str, int]:
             pygame.display.flip()
             clock.tick(60)
 
-        pygame.quit()
-
         print(f"You caught {score} treats!")
         hunger = min(10 + score * 8, 100)
         dollars = score * 3
         happiness = min(score * 4, 100)
         return {'hunger': hunger, 'dollars': dollars, 'happiness': happiness}
     except Exception:
-        if screen is not None:
-            pygame.quit()
         print("Graphical game failed, falling back to console hunger minigame.")
         return _minigame_hunger_fallback(duration)
 

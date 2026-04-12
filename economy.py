@@ -49,6 +49,13 @@ def get_balance() -> int:
     return Dollars
 
 
+def set_balance(amount: int) -> int:
+    # Set the balance directly (used for shop transactions).
+    global Dollars
+    Dollars = max(0, min(amount, Dollars_Max))
+    return Dollars
+
+
 def apply_interest(rate: float | None = None) -> int:
   #Applies a passsive interest gain based on the current balance and configured rate. Returns the amount gained.
     global Dollars

@@ -334,6 +334,7 @@ class ShopScreen:
             self.screen = pygame.display.set_mode((self.screen_width, self.screen_height))
             pygame.display.set_caption("Pet Shop")
             self.display_available = True
+            self.is_fullscreen = False
 
             self.BLACK = (0, 0, 0)
             self.WHITE = (255, 255, 255)
@@ -468,6 +469,10 @@ class ShopScreen:
                 text = self.button_font.render(label, True, self.BLACK)
                 self.screen.blit(text, text.get_rect(center=btn.center))
             
+            # Fullscreen hint
+            fs_hint = pygame.font.Font(None, 18).render("Press F for fullscreen", True, self.LIGHT_GRAY)
+            self.screen.blit(fs_hint, (self.screen_width - 220, 5))
+            
             # Event handling
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -499,11 +504,109 @@ class ShopScreen:
                     elif event.key == pygame.K_RIGHT:
                         if self.pet_shop:
                             self.pet_shop.next_page()
+                    elif event.key == pygame.K_f:
+                        # Toggle fullscreen
+                        self.is_fullscreen = not self.is_fullscreen
+                        if self.is_fullscreen:
+                            self.screen = pygame.display.set_mode((self.screen_width, self.screen_height), pygame.FULLSCREEN)
+                        else:
+                            self.screen = pygame.display.set_mode((self.screen_width, self.screen_height))
             
             pygame.display.flip()
             clock.tick(60)
         
         pygame.quit()
+
+
+class InteractiveTutorialScreen:
+    """Interactive tutorial that requires players to perform actions"""
+    def __init__(self, screen, steps_with_requirements):
+        self.screen = screen
+        self.steps = steps_with_requirements  # List of tuples: (instruction_text, required_action)
+        self.width = screen.get_width()
+        self.height = screen.get_height()
+        self.current_step = 0
+        self.completed = False
+        self.font = pygame.font.Font(None, 32)
+        self.title_font = pygame.font.Font(None, 48)
+        self.small_font = pygame.font.Font(None, 24)
+
+    def is_finished(self):
+        return self.current_step >= len(self.steps)
+
+    def check_action(self, action_performed):
+        """Check if the performed action matches the current step requirement"""
+        if self.is_finished():
+            return False
+        
+        required_action = self.steps[self.current_step][1]
+        action_performed = action_performed.lower()
+        required_action = required_action.lower()
+        
+        # Check if the action matches the requirement
+        if required_action == 'move':
+            # Any movement satisfies the move requirement
+            return action_performed == 'move'
+        elif required_action == 'feed':
+            return action_performed == 'feed'
+        elif required_action == 'play':
+            return action_performed == 'play'
+        elif required_action == 'rest':
+            # Both rest and clean satisfy the rest requirement
+            return action_performed in ['rest', 'clean']
+        elif required_action == 'shop':
+            return action_performed == 'shop'
+        elif required_action == 'minigame':
+            return action_performed == 'minigame'
+        elif action_performed == required_action:
+            return True
+        
+        return False
+
+    def advance_step(self):
+        """Move to the next tutorial step"""
+        if not self.is_finished():
+            self.current_step += 1
+
+    def draw_overlay(self):
+        """Draw the tutorial overlay on top of the game"""
+        if self.is_finished():
+            return
+
+        instruction_text, _ = self.steps[self.current_step]
+        
+        # Semi-transparent overlay
+        overlay = pygame.Surface((self.width, 120), pygame.SRCALPHA)
+        overlay.fill((10, 10, 10, 200))
+        self.screen.blit(overlay, (0, 0))
+
+        # Title
+        title = self.title_font.render('📚 Tutorial', True, (255, 215, 0))
+        self.screen.blit(title, (20, 10))
+
+        # Instruction
+        instruction_render = self.font.render(instruction_text, True, (230, 230, 230))
+        self.screen.blit(instruction_render, (20, 55))
+
+        # Progress
+        progress = self.small_font.render(
+            f'Step {self.current_step + 1} of {len(self.steps)} - Perform the action to continue!',
+            True,
+            (200, 200, 200)
+        )
+        self.screen.blit(progress, (self.width - 420, 10))
+
+        # Completion overlay
+        if self.is_finished():
+            completion = pygame.Surface((self.width, self.height), pygame.SRCALPHA)
+            completion.fill((10, 10, 10, 180))
+            self.screen.blit(completion, (0, 0))
+            
+            complete_text = self.title_font.render('Tutorial Complete!', True, (100, 255, 100))
+            self.screen.blit(complete_text, complete_text.get_rect(center=(self.width // 2, self.height // 2 - 40)))
+            
+            hint = self.font.render('Press any key to continue...', True, (200, 200, 200))
+            self.screen.blit(hint, hint.get_rect(center=(self.width // 2, self.height // 2 + 40)))
 
 
 class TutorialScreen:
@@ -569,13 +672,14 @@ class TutorialScreen:
 
 
 class HubScreen:
-    def __init__(self, screen, pet_name, pet_type, animations):
+    def __init__(self, screen, pet_name, pet_type, animations, tutorial=None):
         self.screen = screen
         self.width = screen.get_width()
         self.height = screen.get_height()
         self.pet_name = pet_name
         self.pet_type = pet_type
         self.animations = animations
+        self.tutorial = tutorial
         self.pet_x = 200
         self.pet_y = 300
         self.speed = 4
@@ -583,12 +687,13 @@ class HubScreen:
         self.walking = False
         self.frame_timer = 0
         self.current_frame = 0
-        self.message = 'Use arrow keys to move. Press E to interact.'
+        self.message = 'Use arrow keys to move. Press E to interact. Press F for fullscreen.'
         self.font = pygame.font.Font(None, 28)
         self.small_font = pygame.font.Font(None, 20)
         self.title_font = pygame.font.Font(None, 40)
         self.reaction_animator = ReactionAnimator()
         self.animation_timer = 0
+        self.is_fullscreen = False
 
         # Interactive areas with better positioning and names
         self.action_spots = [
@@ -598,6 +703,7 @@ class HubScreen:
             {'name': 'Rest', 'x': 600, 'y': 450, 'type': 'bed', 'label': 'Bed'},
             {'name': 'Clean', 'x': 700, 'y': 300, 'type': 'bath', 'label': 'Bath Station'},
             {'name': 'Mini Game', 'x': 100, 'y': 250, 'type': 'minigame', 'label': 'Mini Game'},
+            {'name': 'Shop', 'x': 750, 'y': 450, 'type': 'shop', 'label': 'Pet Shop'},
         ]
 
     def get_pet_rect(self):
@@ -747,14 +853,39 @@ class HubScreen:
     def run(self, on_action):
         clock = pygame.time.Clock()
         running = True
+        tutorial_waiting = False
+        prev_x, prev_y = self.pet_x, self.pet_y
+        
         while running:
             dt = clock.tick(60)
+            
+            # Check for completion screen in tutorial
+            if self.tutorial and self.tutorial.is_finished() and tutorial_waiting:
+                for event in pygame.event.get():
+                    if event.type == pygame.QUIT:
+                        running = False
+                    elif event.type == pygame.KEYDOWN or event.type == pygame.MOUSEBUTTONDOWN:
+                        tutorial_waiting = False
+                self.draw()
+                self.tutorial.draw_overlay()
+                pygame.display.flip()
+                continue
+            
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     running = False
                 elif event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_ESCAPE:
                         running = False
+                    elif event.key == pygame.K_f:
+                        # Toggle fullscreen
+                        self.is_fullscreen = not self.is_fullscreen
+                        if self.is_fullscreen:
+                            self.screen = pygame.display.set_mode((self.width, self.height), pygame.FULLSCREEN)
+                            self.message = "Fullscreen ON (Press F to exit)"
+                        else:
+                            self.screen = pygame.display.set_mode((self.width, self.height))
+                            self.message = "Fullscreen OFF"
                     elif event.key == pygame.K_e:
                         spot = self.get_current_spot()
                         if spot:
@@ -772,9 +903,31 @@ class HubScreen:
                             
                             result = on_action(spot['name'])
                             self.message = result or self.message
+                            
+                            # Check tutorial action requirement
+                            if self.tutorial and not self.tutorial.is_finished():
+                                action_name = spot['name'].lower() if spot['name'] != 'Mini Game' else 'minigame'
+                                if self.tutorial.check_action(action_name):
+                                    self.tutorial.advance_step()
+                                    
             self.handle_input()
             self.update(dt)
+            
+            # Check for movement in tutorial
+            if self.tutorial and not self.tutorial.is_finished():
+                if (self.pet_x != prev_x or self.pet_y != prev_y) and self.walking:
+                    if self.tutorial.check_action('move'):
+                        self.tutorial.advance_step()
+                prev_x, prev_y = self.pet_x, self.pet_y
+            
             self.draw()
+            
+            # Draw tutorial overlay
+            if self.tutorial:
+                self.tutorial.draw_overlay()
+                if self.tutorial.is_finished() and not tutorial_waiting:
+                    tutorial_waiting = True
+            
             pygame.display.flip()
         return
 
@@ -789,6 +942,7 @@ class MinigameSelectionScreen:
             self.screen = pygame.display.set_mode((self.screen_width, self.screen_height))
             pygame.display.set_caption("Choose a Minigame")
             self.display_available = True
+            self.is_fullscreen = False
 
             self.BLACK = (0, 0, 0)
             self.WHITE = (255, 255, 255)
@@ -906,7 +1060,7 @@ class MinigameSelectionScreen:
                 card_rects.append(pygame.Rect(x, y, card_width, card_height))
             
             # Instructions
-            hint = self.desc_font.render("Use arrow keys to select • Press ENTER to play • ESC to cancel", True, (200, 200, 200))
+            hint = self.desc_font.render("Use arrow keys to select • Press ENTER to play • ESC to cancel • F for fullscreen", True, (200, 200, 200))
             hint_rect = hint.get_rect(center=(self.screen_width // 2, self.screen_height - 80))
             self.screen.blit(hint, hint_rect)
             
@@ -936,6 +1090,13 @@ class MinigameSelectionScreen:
                         running = False
                     elif event.key == pygame.K_ESCAPE:
                         running = False
+                    elif event.key == pygame.K_f:
+                        # Toggle fullscreen
+                        self.is_fullscreen = not self.is_fullscreen
+                        if self.is_fullscreen:
+                            self.screen = pygame.display.set_mode((self.screen_width, self.screen_height), pygame.FULLSCREEN)
+                        else:
+                            self.screen = pygame.display.set_mode((self.screen_width, self.screen_height))
                 elif event.type == pygame.MOUSEBUTTONDOWN:
                     for idx, rect in enumerate(card_rects):
                         if rect.collidepoint(event.pos):
