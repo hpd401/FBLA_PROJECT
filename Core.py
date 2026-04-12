@@ -265,25 +265,37 @@ def run_text_menu(state):
 def main():
     pygame.init()
     
-    title = UI.TitleScreen(start_fullscreen=True)
+    # Create a single persistent window (1280x720 matches title/pet selection)
+    screen_width, screen_height = 1280, 720
+    screen = pygame.display.set_mode((screen_width, screen_height), vsync=1)
+    pygame.display.set_caption('Snugbit - Virtual Pet Game')
+    fullscreen_state = False
+    
+    # Title Screen
+    title = UI.TitleScreen(screen_width=screen_width, screen_height=screen_height, 
+                           screen=screen, start_fullscreen=fullscreen_state)
     result = title.run()
+    fullscreen_state = title.is_fullscreen
     if result == 'quit':
         pygame.quit()
         sys.exit()
-    fullscreen_state = title.is_fullscreen  # Track fullscreen state
 
-    pet_choice_screen = UI.PetSelection(start_fullscreen=fullscreen_state)
+    # Pet Selection Screen
+    pet_choice_screen = UI.PetSelection(screen_width=screen_width, screen_height=screen_height,
+                                        screen=screen, start_fullscreen=fullscreen_state)
     pet_type = pet_choice_screen.run()
+    fullscreen_state = pet_choice_screen.is_fullscreen
     if pet_type == 'back':
         print('Going back to title.')
         pygame.quit()
         sys.exit()
-    fullscreen_state = pet_choice_screen.is_fullscreen  # Update fullscreen state
 
-    pet_naming_screen = UI.PetNamingScreen(pet_type=pet_type, start_fullscreen=fullscreen_state)
+    # Pet Naming Screen
+    pet_naming_screen = UI.PetNamingScreen(screen_width=screen_width, screen_height=screen_height,
+                                           pet_type=pet_type, screen=screen, start_fullscreen=fullscreen_state)
     pet_name = pet_naming_screen.run()
+    fullscreen_state = pet_naming_screen.is_fullscreen
     print(f'\nAwesome! You chose a {pet_type} named {pet_name}!')
-    fullscreen_state = pet_naming_screen.is_fullscreen  # Update fullscreen state
 
     state = GameState(pet_type, pet_name)
     state.cap_stats()
@@ -292,33 +304,30 @@ def main():
     decay_thread.daemon = True
     decay_thread.start()
 
-    if title.display_available and pet_choice_screen.display_available:
-        screen = pygame.display.set_mode((800, 600), pygame.FULLSCREEN if fullscreen_state else 0, vsync=1)
-        pygame.display.set_caption('Snugbit Hub')
-        animations = animatons.load_pet_animation(state.pet_type)
-        pet_shop = store.PetShop()
-        
-        # Interactive tutorial with action requirements
-        tutorial_steps_with_actions = [
-            ('Use the arrow keys or WASD to move your pet around.', 'move'),
-            ('Walk to the food bowl and press E to feed your pet.', 'feed'),
-            ('Walk to the play area and press E to play.', 'play'),
-            ('Walk to the bed or bath and press E to interact.', 'rest'),  # rest or clean
-            ('Walk to the shop and press E to visit!', 'shop'),
-            ('You can now explore the hub freely! Press E to perform actions.', 'minigame'),
-        ]
-        
-        interactive_tutorial = UI.InteractiveTutorialScreen(screen, tutorial_steps_with_actions)
-        
-        hub = UI.HubScreen(screen, state.pet_name, state.pet_type, animations, tutorial=interactive_tutorial, start_fullscreen=fullscreen_state)
-        def hub_action_callback(action):
-            return handle_hub_action(action, state, pet_shop, screen=screen, is_fullscreen=hub.is_fullscreen)
-        hub.run(hub_action_callback, state)
-        pygame.quit()
-    else:
-        print('\nNo graphical display detected. Starting the text-based hub instead.')
-        pygame.quit()
-        run_text_menu(state)
+    # Resize screen for hub (800x600) and update caption
+    screen = pygame.display.set_mode((800, 600), pygame.FULLSCREEN if fullscreen_state else 0, vsync=1)
+    pygame.display.set_caption('Snugbit Hub')
+    animations = animatons.load_pet_animation(state.pet_type)
+    pet_shop = store.PetShop()
+    
+    # Interactive tutorial with action requirements
+    tutorial_steps_with_actions = [
+        ('Use the arrow keys or WASD to move your pet around.', 'move'),
+        ('Walk to the food bowl and press E to feed your pet.', 'feed'),
+        ('Walk to the play area and press E to play.', 'play'),
+        ('Walk to the bed or bath and press E to interact.', 'rest'),  # rest or clean
+        ('Walk to the shop and press E to visit!', 'shop'),
+        ('You can now explore the hub freely! Press E to perform actions.', 'minigame'),
+    ]
+    
+    interactive_tutorial = UI.InteractiveTutorialScreen(screen, tutorial_steps_with_actions)
+    
+    hub = UI.HubScreen(screen, state.pet_name, state.pet_type, animations, tutorial=interactive_tutorial, start_fullscreen=fullscreen_state)
+    def hub_action_callback(action):
+        return handle_hub_action(action, state, pet_shop, screen=screen, is_fullscreen=hub.is_fullscreen)
+    hub.run(hub_action_callback, state)
+    pygame.quit()
+    sys.exit()
 
 
 if __name__ == '__main__':

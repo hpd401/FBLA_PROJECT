@@ -158,6 +158,8 @@ def minigame_health(timeout: int = 3, screen=None, is_fullscreen=False) -> Dict[
                 # Wait 2 seconds then exit
                 if state == "timeout":
                     if pygame.time.get_ticks() - (now_shown_time if now_shown_time else wait_start) > 5000:
+                        # Clear input buffer before returning to hub
+                        pygame.event.clear()
                         return {'health': health_reward, 'dollars': dollars_reward}
 
             pygame.display.flip()
@@ -301,6 +303,8 @@ def minigame_happiness(screen=None, is_fullscreen=False) -> Dict[str, int]:
                         if original_screen is None:
                             pygame.quit()
                         happiness = min(20, 5 + level * 3)
+                        # Clear input buffer before returning to hub
+                        pygame.event.clear()
                         return {'happiness': happiness}
 
             screen.fill(bg_color)
@@ -467,6 +471,8 @@ def minigame_hunger(duration: int = 15, screen=None, is_fullscreen=False) -> Dic
         hunger = min(20 + score * 10, 100)
         dollars = score * 5
         happiness = min(score * 5, 100)
+        # Clear input buffer before returning to hub
+        pygame.event.clear()
         return {'hunger': hunger, 'dollars': dollars, 'happiness': happiness}
     except Exception:
         print("Graphical game failed, falling back to console hunger minigame.")

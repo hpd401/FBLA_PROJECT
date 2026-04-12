@@ -5,13 +5,19 @@ from visual_reactions import ReactionAnimator, ReactionType
 
 
 class TitleScreen:
-    def __init__(self, screen_width=1280, screen_height=720, start_fullscreen=False):
+    def __init__(self, screen_width=1280, screen_height=720, screen=None, start_fullscreen=False):
         self.screen_width = screen_width
         self.screen_height = screen_height
         try:
-            flag = pygame.FULLSCREEN if start_fullscreen else 0
-            self.screen = pygame.display.set_mode((self.screen_width, self.screen_height), flag, vsync=1)
-            pygame.display.set_caption('Snugbit - Virtual Pet Game')
+            # Use provided screen or create new one
+            if screen is not None:
+                self.screen = screen
+                self.screen_width = screen.get_width()
+                self.screen_height = screen.get_height()
+            else:
+                flag = pygame.FULLSCREEN if start_fullscreen else 0
+                self.screen = pygame.display.set_mode((self.screen_width, self.screen_height), flag, vsync=1)
+                pygame.display.set_caption('Snugbit - Virtual Pet Game')
             self.display_available = True
             self.is_fullscreen = start_fullscreen
 
@@ -112,13 +118,19 @@ class TitleScreen:
 
 
 class PetSelection:
-    def __init__(self, screen_width=1280, screen_height=720, start_fullscreen=False):
+    def __init__(self, screen_width=1280, screen_height=720, screen=None, start_fullscreen=False):
         self.screen_width = screen_width
         self.screen_height = screen_height
         try:
-            flag = pygame.FULLSCREEN if start_fullscreen else 0
-            self.screen = pygame.display.set_mode((self.screen_width, self.screen_height), flag, vsync=1)
-            pygame.display.set_caption('Choose Your Pet')
+            # Use provided screen or create new one
+            if screen is not None:
+                self.screen = screen
+                self.screen_width = screen.get_width()
+                self.screen_height = screen.get_height()
+            else:
+                flag = pygame.FULLSCREEN if start_fullscreen else 0
+                self.screen = pygame.display.set_mode((self.screen_width, self.screen_height), flag, vsync=1)
+                pygame.display.set_caption('Choose Your Pet')
             self.display_available = True
             self.is_fullscreen = start_fullscreen
 
@@ -324,14 +336,20 @@ class PetSelection:
 
 
 class PetNamingScreen:
-    def __init__(self, screen_width=1280, screen_height=720, pet_type='Dog', start_fullscreen=False):
+    def __init__(self, screen_width=1280, screen_height=720, pet_type='Dog', screen=None, start_fullscreen=False):
         self.screen_width = screen_width
         self.screen_height = screen_height
         self.pet_type = pet_type
         try:
-            flag = pygame.FULLSCREEN if start_fullscreen else 0
-            self.screen = pygame.display.set_mode((self.screen_width, self.screen_height), flag, vsync=1)
-            pygame.display.set_caption('Name Your Pet')
+            # Use provided screen or create new one
+            if screen is not None:
+                self.screen = screen
+                self.screen_width = screen.get_width()
+                self.screen_height = screen.get_height()
+            else:
+                flag = pygame.FULLSCREEN if start_fullscreen else 0
+                self.screen = pygame.display.set_mode((self.screen_width, self.screen_height), flag, vsync=1)
+                pygame.display.set_caption('Name Your Pet')
             self.display_available = True
             self.is_fullscreen = start_fullscreen
 
@@ -836,6 +854,7 @@ class HubScreen:
         self.current_frame = 0
         self.message = 'Use arrow keys to move. Press E to interact. Press F for fullscreen.'
         self.font = pygame.font.Font(None, 28)
+        self.button_font = pygame.font.Font(None, 24)
         self.small_font = pygame.font.Font(None, 20)
         self.title_font = pygame.font.Font(None, 40)
         self.reaction_animator = ReactionAnimator()
@@ -856,6 +875,9 @@ class HubScreen:
             {'name': 'Mini Game', 'x': 100, 'y': 250, 'type': 'minigame', 'label': 'Mini Game'},
             {'name': 'Shop', 'x': 750, 'y': 450, 'type': 'shop', 'label': 'Pet Shop'},
         ]
+        
+        # Exit button in top-right corner
+        self.exit_button = pygame.Rect(self.width - 120, 20, 100, 40)
 
     def get_pet_rect(self):
         sprite = self.get_current_sprite()
@@ -1037,6 +1059,13 @@ class HubScreen:
         hint = self.small_font.render('Move with arrow keys • Press E to interact', True, (240, 240, 240))
         self.screen.blit(hint, (28, 65))
         
+        # Exit button in top-right corner
+        pygame.draw.rect(self.screen, (200, 100, 100), self.exit_button)
+        pygame.draw.rect(self.screen, (255, 255, 255), self.exit_button, 2)
+        exit_text = self.button_font.render('Exit (ESC)', True, (255, 255, 255))
+        exit_text_rect = exit_text.get_rect(center=self.exit_button.center)
+        self.screen.blit(exit_text, exit_text_rect)
+        
         # Draw stats panel if state is provided
         if state:
             self.draw_stats_panel(state)
@@ -1114,6 +1143,10 @@ class HubScreen:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     running = False
+                elif event.type == pygame.MOUSEBUTTONDOWN:
+                    # Check if exit button was clicked
+                    if self.exit_button.collidepoint(event.pos):
+                        running = False
                 elif event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_ESCAPE:
                         running = False
