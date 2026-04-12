@@ -97,12 +97,12 @@ def clean_pet(state):
     return f"You cleaned {state.pet_name}. {pet_response('clean', state.pet_name)}"
 
 
-def play_minigame(state, screen=None):
+def play_minigame(state, screen=None, is_fullscreen=False):
     minigame_selection = UI.MinigameSelectionScreen(screen=screen)
     chosen_game = minigame_selection.run()
 
     if chosen_game == 'minigame_health':
-        result = minigames.minigame_health()
+        result = minigames.minigame_health(screen=screen, is_fullscreen=is_fullscreen)
         state.health += result.get('health', 0)
         earned = result.get('dollars', 0)
         if earned:
@@ -110,12 +110,12 @@ def play_minigame(state, screen=None):
         state.cap_stats()
         return f"Medicine Rush completed! Health +{result.get('health', 0)}, earned ${earned}."
     elif chosen_game == 'minigame_happiness':
-        result = minigames.minigame_happiness()
+        result = minigames.minigame_happiness(screen=screen, is_fullscreen=is_fullscreen)
         state.happiness += result.get('happiness', 0)
         state.cap_stats()
-        return f"Trick Performance completed! Happiness +{result.get('happiness', 0)}."
+        return f"Simon Says completed! Happiness +{result.get('happiness', 0)}."
     elif chosen_game == 'minigame_hunger':
-        result = minigames.minigame_hunger()
+        result = minigames.minigame_hunger(screen=screen, is_fullscreen=is_fullscreen)
         state.hunger = max(0, state.hunger - result.get('hunger', 0))
         state.happiness += result.get('happiness', 0)
         earned = result.get('dollars', 0)
@@ -131,9 +131,14 @@ def collect_income():
     return f'You received a paycheck of ${amount}!'
 
 
-def handle_hub_action(action_name, state, pet_shop=None, screen=None):
+def handle_hub_action(action_name, state, pet_shop=None, screen=None, is_fullscreen=False):
     if action_name == 'Feed':
         return feed_pet(state)
+    if action_name == 'Water':
+        state.hunger = max(0, state.hunger - 15)
+        record_action('water')
+        state.cap_stats()
+        return f"You gave {state.pet_name} water! {pet_response('water', state.pet_name)}"
     if action_name == 'Play':
         return play_with_pet(state)
     if action_name == 'Rest':
@@ -141,7 +146,7 @@ def handle_hub_action(action_name, state, pet_shop=None, screen=None):
     if action_name == 'Clean':
         return clean_pet(state)
     if action_name == 'Mini Game':
-        return play_minigame(state, screen=screen)
+        return play_minigame(state, screen=screen, is_fullscreen=is_fullscreen)
     if action_name == 'Shop':
         return visit_shop(pet_shop, screen=screen)
     return None
@@ -246,7 +251,9 @@ def main():
         interactive_tutorial = UI.InteractiveTutorialScreen(screen, tutorial_steps_with_actions)
         
         hub = UI.HubScreen(screen, state.pet_name, state.pet_type, animations, tutorial=interactive_tutorial)
-        hub.run(lambda action: handle_hub_action(action, state, pet_shop, screen=screen))
+        def hub_action_callback(action):
+            return handle_hub_action(action, state, pet_shop, screen=screen, is_fullscreen=hub.is_fullscreen)
+        hub.run(hub_action_callback)
         pygame.quit()
     else:
         print('\nNo graphical display detected. Starting the text-based hub instead.')

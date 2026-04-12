@@ -122,94 +122,202 @@ class PetSelection:
             self.display_available = True
             self.is_fullscreen = start_fullscreen
 
+            # Colors
             self.BLACK = (0, 0, 0)
             self.WHITE = (255, 255, 255)
-            self.BLUE = (0, 0, 255)
-            self.GREEN = (0, 255, 0)
-            self.RED = (255, 0, 0)
-            self.YELLOW = (255, 255, 0)
+            self.DARK_BLUE = (25, 50, 100)
+            self.LIGHT_BLUE = (100, 180, 255)
+            self.GOLD = (255, 215, 0)
+            self.GREEN = (100, 255, 100)
+            self.DARK_GREEN = (20, 100, 50)
+            self.ORANGE = (255, 165, 0)
+            self.PURPLE = (200, 100, 200)
+            self.DARK_GRAY = (50, 50, 50)
 
-            self.title_font = pygame.font.Font(None, 48)
+            # Fonts
+            self.title_font = pygame.font.Font(None, 72)
+            self.pet_name_font = pygame.font.Font(None, 44)
+            self.desc_font = pygame.font.Font(None, 28)
+            self.stats_font = pygame.font.Font(None, 22)
             self.button_font = pygame.font.Font(None, 24)
 
-            self.title_text = self.title_font.render('Choose Your Pet', True, self.WHITE)
+            self.title_text = self.title_font.render('🐾 Choose Your Pet 🐾', True, self.GOLD)
             self.title_rect = self.title_text.get_rect(center=(self.screen_width // 2, 50))
 
-            self.dog_button = pygame.Rect(100, 150, 150, 100)
-            self.cat_button = pygame.Rect(300, 150, 150, 100)
-            self.bird_button = pygame.Rect(500, 150, 150, 100)
-            self.robot_button = pygame.Rect(200, 300, 150, 100)
-            self.back_button = pygame.Rect(450, 300, 150, 100)
+            # Pet data with characteristics
+            self.pets = [
+                {
+                    'name': 'Dog',
+                    'emoji': '🐕',
+                    'color': (70, 130, 200),
+                    'highlight_color': (100, 160, 230),
+                    'description': 'Loyal & Energetic',
+                    'traits': 'Loves to play, very friendly',
+                    'stats': '❤️ Health: High | ⚡ Energy: High | 😊 Happiness: High',
+                    'rect': pygame.Rect(50, 150, 250, 380),
+                    'key': pygame.K_1
+                },
+                {
+                    'name': 'Cat',
+                    'emoji': '🐈',
+                    'color': (200, 150, 100),
+                    'highlight_color': (230, 180, 130),
+                    'description': 'Graceful & Independent',
+                    'traits': 'Aloof but affectionate',
+                    'stats': '❤️ Health: Medium | ⚡ Energy: Low | 😊 Happiness: Medium',
+                    'rect': pygame.Rect(375, 150, 250, 380),
+                    'key': pygame.K_2
+                },
+                {
+                    'name': 'Bird',
+                    'emoji': '🦜',
+                    'color': (255, 150, 50),
+                    'highlight_color': (255, 180, 100),
+                    'description': 'Colorful & Cheerful',
+                    'traits': 'Playful and talkative',
+                    'stats': '❤️ Health: Medium | ⚡ Energy: Very High | 😊 Happiness: Very High',
+                    'rect': pygame.Rect(700, 150, 250, 380),
+                    'key': pygame.K_3
+                },
+                {
+                    'name': 'Robot',
+                    'emoji': '🤖',
+                    'color': (150, 150, 150),
+                    'highlight_color': (200, 200, 200),
+                    'description': 'Reliable & Mechanical',
+                    'traits': 'Advanced AI companion',
+                    'stats': '❤️ Health: Very High | ⚡ Energy: Unlimited | 😊 Happiness: Quirky',
+                    'rect': pygame.Rect(1025, 150, 250, 380),
+                    'key': pygame.K_4
+                },
+            ]
+
+            self.hovered_pet = None
+            self.animation_timer = 0
+
         except Exception:
             self.display_available = False
 
-    def draw_button(self, rect, text, color):
-        pygame.draw.rect(self.screen, color, rect)
-        text_surf = self.button_font.render(text, True, self.BLACK)
-        text_rect = text_surf.get_rect(center=rect.center)
-        self.screen.blit(text_surf, text_rect)
+    def draw_pet_card(self, pet_data, is_hovered=False):
+        """Draw an enhanced pet selection card"""
+        rect = pet_data['rect']
+        color = pet_data['highlight_color'] if is_hovered else pet_data['color']
+        
+        # Card background with gradient effect
+        pygame.draw.rect(self.screen, color, rect, border_radius=15)
+        
+        # Border
+        border_color = self.GOLD if is_hovered else self.WHITE
+        border_width = 4 if is_hovered else 2
+        pygame.draw.rect(self.screen, border_color, rect, border_width, border_radius=15)
+        
+        # Pet emoji/icon
+        emoji_text = pygame.font.Font(None, 100).render(pet_data['emoji'], True, self.WHITE)
+        emoji_rect = emoji_text.get_rect(center=(rect.centerx, rect.y + 60))
+        self.screen.blit(emoji_text, emoji_rect)
+        
+        # Pet name
+        name_text = self.pet_name_font.render(pet_data['name'], True, self.BLACK)
+        name_rect = name_text.get_rect(center=(rect.centerx, rect.y + 150))
+        self.screen.blit(name_text, name_rect)
+        
+        # Description
+        desc_text = self.desc_font.render(pet_data['description'], True, self.DARK_GRAY)
+        desc_rect = desc_text.get_rect(center=(rect.centerx, rect.y + 200))
+        self.screen.blit(desc_text, desc_rect)
+        
+        # Traits
+        traits_text = self.stats_font.render(pet_data['traits'], True, self.DARK_GRAY)
+        traits_rect = traits_text.get_rect(center=(rect.centerx, rect.y + 240))
+        self.screen.blit(traits_text, traits_rect)
+        
+        # Stats
+        stats_text = self.stats_font.render(pet_data['stats'], True, self.DARK_GRAY)
+        stats_rect = stats_text.get_rect(center=(rect.centerx, rect.y + 300))
+        self.screen.blit(stats_text, stats_rect)
+        
+        # Keyboard hint
+        key_hint = self.button_font.render(f"Press {pet_data['key'].name[-1]}", True, self.WHITE)
+        key_hint_rect = key_hint.get_rect(center=(rect.centerx, rect.y + 350))
+        self.screen.blit(key_hint, key_hint_rect)
+        
+        # Hover animation - add frame border pulse
+        if is_hovered:
+            pulse = abs(self.animation_timer % 20 - 10) / 5.0
+            pygame.draw.rect(self.screen, self.GOLD, rect, int(border_width + pulse), border_radius=15)
 
     def run(self):
         if not hasattr(self, 'display_available') or not self.display_available:
             print('No display available, defaulting to Dog.')
             return 'Dog'
         clock = pygame.time.Clock()
-        pygame.event.clear()  # Clear input buffer
+        pygame.event.clear()
         start_time = pygame.time.get_ticks()
         running = True
         selected_pet = None
+        
         while running:
             current_time = pygame.time.get_ticks()
-            if current_time - start_time > 10000:
+            if current_time - start_time > 15000:
                 selected_pet = 'Dog'
                 running = False
                 break
 
-            self.screen.fill(self.BLACK)
-            self.screen.blit(self.title_text, self.title_rect)
-            self.draw_button(self.dog_button, 'Dog', self.BLUE)
-            self.draw_button(self.cat_button, 'Cat', self.GREEN)
-            self.draw_button(self.bird_button, 'Bird', self.YELLOW)
-            self.draw_button(self.robot_button, 'Robot', self.RED)
-            self.draw_button(self.back_button, 'Back', self.WHITE)
+            # Get mouse position for hover detection
+            mouse_pos = pygame.mouse.get_pos()
+            self.hovered_pet = None
+            
+            for pet_data in self.pets:
+                if pet_data['rect'].collidepoint(mouse_pos):
+                    self.hovered_pet = pet_data['name']
+                    break
 
+            # Draw background
+            self.screen.fill(self.DARK_BLUE)
+            
+            # Draw gradient-like background
+            for i in range(self.screen_height):
+                color_ratio = i / self.screen_height
+                r = int(25 + (100 - 25) * color_ratio)
+                g = int(50 + (180 - 50) * color_ratio)
+                b = int(100 + (255 - 100) * color_ratio)
+                pygame.draw.line(self.screen, (r, g, b), (0, i), (self.screen_width, i))
+            
+            # Draw title
+            self.screen.blit(self.title_text, self.title_rect)
+            
+            # Instructions
+            instr_text = self.desc_font.render('Click a pet or press 1-4 • F for fullscreen', True, self.LIGHT_BLUE)
+            instr_rect = instr_text.get_rect(center=(self.screen_width // 2, self.screen_height - 50))
+            self.screen.blit(instr_text, instr_rect)
+
+            # Draw pet cards
+            for pet_data in self.pets:
+                is_hovered = self.hovered_pet == pet_data['name']
+                self.draw_pet_card(pet_data, is_hovered)
+
+            # Event handling
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     running = False
                 elif event.type == pygame.MOUSEBUTTONDOWN:
-                    if self.dog_button.collidepoint(event.pos):
-                        selected_pet = 'Dog'
-                        running = False
-                    elif self.cat_button.collidepoint(event.pos):
-                        selected_pet = 'Cat'
-                        running = False
-                    elif self.bird_button.collidepoint(event.pos):
-                        selected_pet = 'Bird'
-                        running = False
-                    elif self.robot_button.collidepoint(event.pos):
-                        selected_pet = 'Robot'
-                        running = False
-                    elif self.back_button.collidepoint(event.pos):
-                        selected_pet = 'back'
-                        running = False
+                    for pet_data in self.pets:
+                        if pet_data['rect'].collidepoint(event.pos):
+                            selected_pet = pet_data['name']
+                            running = False
+                            break
                 elif event.type == pygame.KEYDOWN:
-                    if event.key == pygame.K_1:
-                        selected_pet = 'Dog'
-                        running = False
-                    elif event.key == pygame.K_2:
-                        selected_pet = 'Cat'
-                        running = False
-                    elif event.key == pygame.K_3:
-                        selected_pet = 'Bird'
-                        running = False
-                    elif event.key == pygame.K_4:
-                        selected_pet = 'Robot'
-                        running = False
-                    elif event.key == pygame.K_f:
+                    for pet_data in self.pets:
+                        if event.key == pet_data['key']:
+                            selected_pet = pet_data['name']
+                            running = False
+                            break
+                    if event.key == pygame.K_f:
                         self.is_fullscreen = not self.is_fullscreen
                         flag = pygame.FULLSCREEN if self.is_fullscreen else 0
-                        self.screen = pygame.display.set_mode((self.screen_width, self.screen_height), flag)
+                        self.screen = pygame.display.set_mode((self.screen_width, self.screen_height), flag, vsync=1)
 
+            self.animation_timer += 1
             pygame.display.flip()
             clock.tick(60)
 
@@ -796,9 +904,12 @@ class HubScreen:
         if self.walking:
             self.frame_timer += dt
             frames = self.get_animation_frames()
-            if self.frame_timer > 120 and frames:
+            if self.frame_timer > 60 and frames:  # Reduced from 120ms to 60ms for smoother animation
                 self.frame_timer = 0
                 self.current_frame = (self.current_frame + 1) % len(frames)
+        else:
+            self.frame_timer = 0
+            self.current_frame = 0
         
         self.animation_timer += 1
         self.reaction_animator.update()
