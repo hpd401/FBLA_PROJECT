@@ -235,14 +235,9 @@ class PetSelection:
         traits_rect = traits_text.get_rect(center=(rect.centerx, rect.y + 240))
         self.screen.blit(traits_text, traits_rect)
         
-        # Stats
-        stats_text = self.stats_font.render(pet_data['stats'], True, self.DARK_GRAY)
-        stats_rect = stats_text.get_rect(center=(rect.centerx, rect.y + 300))
-        self.screen.blit(stats_text, stats_rect)
-        
         # Keyboard hint
         key_hint = self.button_font.render(f"Press {pet_data['key_name']}", True, self.WHITE)
-        key_hint_rect = key_hint.get_rect(center=(rect.centerx, rect.y + 350))
+        key_hint_rect = key_hint.get_rect(center=(rect.centerx, rect.y + 300))
         self.screen.blit(key_hint, key_hint_rect)
         
         # Hover animation - add frame border pulse
@@ -824,7 +819,7 @@ class TutorialScreen:
 
 
 class HubScreen:
-    def __init__(self, screen, pet_name, pet_type, animations, tutorial=None):
+    def __init__(self, screen, pet_name, pet_type, animations, tutorial=None, start_fullscreen=False):
         self.screen = screen
         self.width = screen.get_width()
         self.height = screen.get_height()
@@ -845,7 +840,7 @@ class HubScreen:
         self.title_font = pygame.font.Font(None, 40)
         self.reaction_animator = ReactionAnimator()
         self.animation_timer = 0
-        self.is_fullscreen = False
+        self.is_fullscreen = start_fullscreen
 
         # Interactive areas with better positioning and names
         self.action_spots = [

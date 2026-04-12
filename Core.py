@@ -208,22 +208,25 @@ def run_text_menu(state):
 def main():
     pygame.init()
     
-    title = UI.TitleScreen()
+    title = UI.TitleScreen(start_fullscreen=True)
     result = title.run()
     if result == 'quit':
         pygame.quit()
         sys.exit()
+    fullscreen_state = title.is_fullscreen  # Track fullscreen state
 
-    pet_choice_screen = UI.PetSelection()
+    pet_choice_screen = UI.PetSelection(start_fullscreen=fullscreen_state)
     pet_type = pet_choice_screen.run()
     if pet_type == 'back':
         print('Going back to title.')
         pygame.quit()
         sys.exit()
+    fullscreen_state = pet_choice_screen.is_fullscreen  # Update fullscreen state
 
-    pet_naming_screen = UI.PetNamingScreen(pet_type=pet_type)
+    pet_naming_screen = UI.PetNamingScreen(pet_type=pet_type, start_fullscreen=fullscreen_state)
     pet_name = pet_naming_screen.run()
     print(f'\nAwesome! You chose a {pet_type} named {pet_name}!')
+    fullscreen_state = pet_naming_screen.is_fullscreen  # Update fullscreen state
 
     state = GameState(pet_type, pet_name)
     state.cap_stats()
@@ -233,7 +236,7 @@ def main():
     decay_thread.start()
 
     if title.display_available and pet_choice_screen.display_available:
-        screen = pygame.display.set_mode((800, 600), vsync=1)
+        screen = pygame.display.set_mode((800, 600), pygame.FULLSCREEN if fullscreen_state else 0, vsync=1)
         pygame.display.set_caption('Snugbit Hub')
         animations = animatons.load_pet_animation(state.pet_type)
         pet_shop = store.PetShop()
@@ -250,7 +253,7 @@ def main():
         
         interactive_tutorial = UI.InteractiveTutorialScreen(screen, tutorial_steps_with_actions)
         
-        hub = UI.HubScreen(screen, state.pet_name, state.pet_type, animations, tutorial=interactive_tutorial)
+        hub = UI.HubScreen(screen, state.pet_name, state.pet_type, animations, tutorial=interactive_tutorial, start_fullscreen=fullscreen_state)
         def hub_action_callback(action):
             return handle_hub_action(action, state, pet_shop, screen=screen, is_fullscreen=hub.is_fullscreen)
         hub.run(hub_action_callback)
