@@ -13,86 +13,87 @@ def pet_stats(pet_type):
     else:
         return {"Hunger": 100, "Health": 100, "Happiness": 100, "Energy": 100}
 
-def pet_response(action):
+def pet_response(action, pet_name="Pet"):
     personality = assign_personality()
     if personality == "Nurturing":
         if action == "feed":
-            return " {pet_name} eagerly accepts the food, showing deep appreciation for your nurturing care."
+            return " {name} eagerly accepts the food, showing deep appreciation for your nurturing care.".format(name=pet_name)
         elif action == "play":
-            return " {pet_name} plays gently, valuing the bond you're building."
+            return " {name} plays gently, valuing the bond you're building.".format(name=pet_name)
         elif action == "clean":
-            return " {pet_name} stays still, trusting your careful cleaning."
+            return " {name} stays still, trusting your careful cleaning.".format(name=pet_name)
         elif action == "rest":
-            return "{pet_name} rests peacefully, feeling secure in your presence."
+            return "{name} rests peacefully, feeling secure in your presence.".format(name=pet_name)
         else:
-            return "{pet_name} appreciates your nurturing attention."
+            return "{name} appreciates your nurturing attention.".format(name=pet_name)
     elif personality == "Playful":
         if action == "feed":
-            return " {pet_name} bounces with excitement, loving the treat and asking for more playtime!"
+            return " {name} bounces with excitement, loving the treat and asking for more playtime!".format(name=pet_name)
         elif action == "play":
-            return "{pet_name} moves energetically, loving the fun and games you share together!"
+            return "{name} moves energetically, loving the fun and games you share together!".format(name=pet_name)
         elif action == "clean":
-            return "{pet_name} squirms playfully, making cleaning a fun and silly experience!"
+            return "{name} squirms playfully, making cleaning a fun and silly experience!".format(name=pet_name)
         elif action == "rest":
-            return "{pet_name} reluctantly rests, but dream of the next playful adventure!"
+            return "{name} reluctantly rests, but dreams of the next playful adventure!".format(name=pet_name)
         else:
-            return "{pet_name} is always ready for fun and games with you!"
+            return "{name} is always ready for fun and games with you!".format(name=pet_name)
     elif personality == "Responsible":
         if action == "feed":
-            return "{pet_name} eats calmly, appreciating the care you take in providing for them."
+            return "{name} eats calmly, appreciating the care you take in providing for them.".format(name=pet_name)
         elif action == "play":
-            return "{pet_name} engages in play thoughtfully, enjoying the quality time together."
+            return "{name} engages in play thoughtfully, enjoying the quality time together.".format(name=pet_name)
         elif action == "clean":
-            return "{pet_name} stays still and cooperative, understanding the importance of cleanliness."
+            return "{name} stays still and cooperative, understanding the importance of cleanliness.".format(name=pet_name)
         elif action == "rest":
-            return "{pet_name} rests quietly, valuing the routine and structure you provide."
+            return "{name} rests quietly, valuing the routine and structure you provide.".format(name=pet_name)
         else:
-            return "{pet_name} appreciates your responsible care and attention."
+            return "{name} appreciates your responsible care and attention.".format(name=pet_name)
     elif personality == "Relaxed":
         if action == "feed":
-            return "{pet_name} eats slowly, savoring the food and enjoying the moment."
+            return "{name} eats slowly, savoring the food and enjoying the moment.".format(name=pet_name)
         elif action == "play":
-            return "{pet_name} plays in a laid-back manner, enjoying the activity without any rush."
+            return "{name} plays in a laid-back manner, enjoying the activity without any rush.".format(name=pet_name)
         elif action == "clean":
-            return "{pet_name} tolerates cleaning with a calm demeanor, not minding the process."
+            return "{name} tolerates cleaning with a calm demeanor, not minding the process.".format(name=pet_name)
         elif action == "rest":
-            return "{pet_name} rests deeply, feeling completely at ease in your care."
+            return "{name} rests deeply, feeling completely at ease in your care.".format(name=pet_name)
         else:
-            return "{pet_name} enjoys a relaxed and easygoing relationship with you."
+            return "{name} enjoys a relaxed and easygoing relationship with you.".format(name=pet_name)
     elif personality == "Caring":
         if action == "feed":
-            return "{pet_name} eats with gratitude, showing a strong bond and appreciation for your care."
+            return "{name} eats with gratitude, showing a strong bond and appreciation for your care.".format(name=pet_name)
         elif action == "play":
-            return "{pet_name} plays with affection, cherishing the time spent together."
+            return "{name} plays with affection, cherishing the time spent together.".format(name=pet_name)
         elif action == "clean":
-            return "{pet_name} stays still and cooperative, trusting your care and attention."
+            return "{name} stays still and cooperative, trusting your care and attention.".format(name=pet_name)
         elif action == "rest":
-            return "{pet_name} rests peacefully, feeling loved and secure in your presence."
+            return "{name} rests peacefully, feeling loved and secure in your presence.".format(name=pet_name)
         else:
-            return "{pet_name} deeply values the caring relationship you share."
+            return "{name} deeply values the caring relationship you share.".format(name=pet_name)
     elif personality == "Energetic":
         if action == "feed":
-            return "{pet_name} eats quickly, fueled by the energy and excitement you provide!"
+            return "{name} eats quickly, fueled by the energy and excitement you provide!".format(name=pet_name)
         elif action == "play":
-            return "{pet_name} plays with boundless energy, loving every moment of fun and activity!"
+            return "{name} plays with boundless energy, loving every moment of fun and activity!".format(name=pet_name)
         elif action == "clean":
-            return "{pet_name} fidgets during cleaning, eager to get back to playing and having fun!"
+            return "{name} fidgets during cleaning, eager to get back to playing and having fun!".format(name=pet_name)
         elif action == "rest":
-            return "{pet_name} struggles to rest, always buzzing with energy and ready for the next adventure!"
+            return "{name} struggles to rest, always buzzing with energy and ready for the next adventure!".format(name=pet_name)
         else:
-            return "{pet_name} is full of energy and always ready for fun with you!"
+            return "{name} is full of energy and always ready for fun with you!".format(name=pet_name)
     elif personality == "Balanced":
         if action == "feed":
-            return "{pet_name} eats with contentment, enjoying the balance of care and attention you provide."
+            return "{name} eats with contentment, enjoying the balance of care and attention you provide.".format(name=pet_name)
         elif action == "play":
-            return "{pet_name} plays with enthusiasm, appreciating the fun and connection you share."
+            return "{name} plays with enthusiasm, appreciating the fun and connection you share.".format(name=pet_name)
         elif action == "clean":
-            return "{pet_name} cooperates during cleaning, understanding the importance of care and hygiene."
+            return "{name} cooperates during cleaning, understanding the importance of care and hygiene.".format(name=pet_name)
         elif action == "rest":
-            return "{pet_name} rests comfortably, feeling secure and well-cared for in your presence."
+            return "{name} rests comfortably, feeling secure and well-cared for in your presence.".format(name=pet_name)
         else:
-            return "{pet_name} enjoys a balanced and harmonious relationship with you."
-    else:        return "{pet_name} responds in a unique way, reflecting its individual personality and the care you provide."
+            return "{name} enjoys a balanced and harmonious relationship with you.".format(name=pet_name)
+    else:
+        return "{name} responds in a unique way, reflecting its individual personality and the care you provide.".format(name=pet_name)
 
 # Action tracking for personality assignment
 action_counts = {"feed": 0, "play": 0, "clean": 0, "rest": 0}

@@ -5,42 +5,53 @@ from visual_reactions import ReactionAnimator, ReactionType
 
 
 class TitleScreen:
-    def __init__(self, screen_width=800, screen_height=600):
-        pygame.init()
+    def __init__(self, screen_width=1920, screen_height=1080, start_fullscreen=True):
         self.screen_width = screen_width
         self.screen_height = screen_height
         try:
-            self.screen = pygame.display.set_mode((self.screen_width, self.screen_height))
+            flag = pygame.FULLSCREEN if start_fullscreen else 0
+            self.screen = pygame.display.set_mode((self.screen_width, self.screen_height), flag)
             pygame.display.set_caption('Snugbit - Virtual Pet Game')
             self.display_available = True
+            self.is_fullscreen = start_fullscreen
 
             # Colors
             self.BLACK = (0, 0, 0)
+            self.DARK_BLUE = (25, 50, 100)
+            self.LIGHT_BLUE = (100, 180, 255)
             self.WHITE = (255, 255, 255)
-            self.BLUE = (0, 0, 255)
-            self.GREEN = (0, 255, 0)
+            self.GOLD = (255, 215, 0)
+            self.GREEN = (100, 255, 100)
 
             # Fonts
-            self.title_font = pygame.font.Font(None, 72)
-            self.button_font = pygame.font.Font(None, 36)
+            self.title_font = pygame.font.Font(None, 120)
+            self.subtitle_font = pygame.font.Font(None, 48)
+            self.button_font = pygame.font.Font(None, 48)
+            self.hint_font = pygame.font.Font(None, 32)
 
             # Title text
-            self.title_text = self.title_font.render('Snugbit', True, self.WHITE)
+            self.title_text = self.title_font.render('🐾 Snugbit 🐾', True, self.GOLD)
             self.title_rect = self.title_text.get_rect(center=(self.screen_width // 2, self.screen_height // 4))
 
             # Subtitle
-            self.subtitle_font = pygame.font.Font(None, 24)
-            self.subtitle_text = self.subtitle_font.render('Virtual Pet Adventure', True, self.WHITE)
-            self.subtitle_rect = self.subtitle_text.get_rect(center=(self.screen_width // 2, self.screen_height // 4 + 80))
+            self.subtitle_text = self.subtitle_font.render('Virtual Pet Adventure', True, self.LIGHT_BLUE)
+            self.subtitle_rect = self.subtitle_text.get_rect(center=(self.screen_width // 2, self.screen_height // 4 + 100))
+
+            # Tagline
+            self.tagline_text = self.hint_font.render('Care for your digital companion!', True, self.WHITE)
+            self.tagline_rect = self.tagline_text.get_rect(center=(self.screen_width // 2, self.screen_height // 4 + 180))
 
             # Buttons
-            self.start_button = pygame.Rect(self.screen_width // 2 - 100, self.screen_height // 2, 200, 50)
-            self.quit_button = pygame.Rect(self.screen_width // 2 - 100, self.screen_height // 2 + 70, 200, 50)
+            btn_width, btn_height = 250, 70
+            self.start_button = pygame.Rect(self.screen_width // 2 - btn_width // 2, self.screen_height // 2 + 50, btn_width, btn_height)
+            self.quit_button = pygame.Rect(self.screen_width // 2 - btn_width // 2, self.screen_height // 2 + 160, btn_width, btn_height)
         except Exception:
             self.display_available = False
 
-    def draw_button(self, rect, text, color):
+    def draw_button(self, rect, text, color, border_color=None):
         pygame.draw.rect(self.screen, color, rect)
+        if border_color:
+            pygame.draw.rect(self.screen, border_color, rect, 4)
         text_surf = self.button_font.render(text, True, self.BLACK)
         text_rect = text_surf.get_rect(center=rect.center)
         self.screen.blit(text_surf, text_rect)
@@ -50,50 +61,65 @@ class TitleScreen:
             print('No display available, skipping title screen.')
             return 'start_game'
         clock = pygame.time.Clock()
-        start_time = pygame.time.get_ticks()
         running = True
         while running:
-            current_time = pygame.time.get_ticks()
-            if current_time - start_time > 5000:  # 5 seconds timeout
-                running = False
-                break
+            # Gradient background effect
+            for y in range(self.screen_height):
+                color_val = int(25 + (100 - 25) * (y / self.screen_height))
+                pygame.draw.line(self.screen, (color_val // 4, color_val // 2, color_val), (0, y), (self.screen_width, y))
 
-            self.screen.fill(self.BLACK)
+            # Draw decorative circles
+            pygame.draw.circle(self.screen, self.LIGHT_BLUE, (100, 100), 50)
+            pygame.draw.circle(self.screen, self.LIGHT_BLUE, (self.screen_width - 100, self.screen_height - 100), 50)
+            
+            # Draw titles
             self.screen.blit(self.title_text, self.title_rect)
             self.screen.blit(self.subtitle_text, self.subtitle_rect)
-            self.draw_button(self.start_button, 'Start Game', self.GREEN)
-            self.draw_button(self.quit_button, 'Quit', self.BLUE)
+            self.screen.blit(self.tagline_text, self.tagline_rect)
+            
+            # Draw buttons with enhanced styling
+            self.draw_button(self.start_button, 'Start Game', self.GREEN, self.WHITE)
+            self.draw_button(self.quit_button, 'Quit', (200, 100, 100), self.WHITE)
+            
+            # Draw hints
+            hint = self.hint_font.render('Press SPACE or click to start | F to toggle fullscreen', True, (200, 200, 200))
+            hint_rect = hint.get_rect(center=(self.screen_width // 2, self.screen_height - 60))
+            self.screen.blit(hint, hint_rect)
 
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
-                    pygame.quit()
-                    sys.exit()
+                    running = False
+                    return 'quit'
                 elif event.type == pygame.MOUSEBUTTONDOWN:
                     if self.start_button.collidepoint(event.pos):
                         running = False
                     elif self.quit_button.collidepoint(event.pos):
-                        pygame.quit()
-                        sys.exit()
+                        running = False
+                        return 'quit'
                 elif event.type == pygame.KEYDOWN:
                     if event.key in (pygame.K_RETURN, pygame.K_SPACE):
                         running = False
+                    elif event.key == pygame.K_f:
+                        self.is_fullscreen = not self.is_fullscreen
+                        flag = pygame.FULLSCREEN if self.is_fullscreen else 0
+                        self.screen = pygame.display.set_mode((self.screen_width, self.screen_height), flag)
 
             pygame.display.flip()
             clock.tick(60)
 
-        pygame.quit()
         return 'start_game'
 
 
 class PetSelection:
-    def __init__(self, screen_width=800, screen_height=600):
-        pygame.init()
+    def __init__(self, screen_width=1920, screen_height=1080, start_fullscreen=True):
         self.screen_width = screen_width
         self.screen_height = screen_height
         try:
-            self.screen = pygame.display.set_mode((self.screen_width, self.screen_height))
+            flag = pygame.FULLSCREEN if start_fullscreen else 0
+            self.screen = pygame.display.set_mode((self.screen_width, self.screen_height), flag)
             pygame.display.set_caption('Choose Your Pet')
             self.display_available = True
+            self.is_fullscreen = start_fullscreen
 
             self.BLACK = (0, 0, 0)
             self.WHITE = (255, 255, 255)
@@ -147,8 +173,7 @@ class PetSelection:
 
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
-                    pygame.quit()
-                    sys.exit()
+                    running = False
                 elif event.type == pygame.MOUSEBUTTONDOWN:
                     if self.dog_button.collidepoint(event.pos):
                         selected_pet = 'Dog'
@@ -178,24 +203,28 @@ class PetSelection:
                     elif event.key == pygame.K_4:
                         selected_pet = 'Robot'
                         running = False
+                    elif event.key == pygame.K_f:
+                        self.is_fullscreen = not self.is_fullscreen
+                        flag = pygame.FULLSCREEN if self.is_fullscreen else 0
+                        self.screen = pygame.display.set_mode((self.screen_width, self.screen_height), flag)
 
             pygame.display.flip()
             clock.tick(60)
 
-        pygame.quit()
         return selected_pet
 
 
 class PetNamingScreen:
-    def __init__(self, screen_width=800, screen_height=600, pet_type='Dog'):
-        pygame.init()
+    def __init__(self, screen_width=1920, screen_height=1080, pet_type='Dog', start_fullscreen=True):
         self.screen_width = screen_width
         self.screen_height = screen_height
         self.pet_type = pet_type
         try:
-            self.screen = pygame.display.set_mode((self.screen_width, self.screen_height))
+            flag = pygame.FULLSCREEN if start_fullscreen else 0
+            self.screen = pygame.display.set_mode((self.screen_width, self.screen_height), flag)
             pygame.display.set_caption('Name Your Pet')
             self.display_available = True
+            self.is_fullscreen = start_fullscreen
 
             self.BLACK = (0, 0, 0)
             self.WHITE = (255, 255, 255)
@@ -298,8 +327,7 @@ class PetNamingScreen:
 
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
-                    pygame.quit()
-                    sys.exit()
+                    running = False
                 elif event.type == pygame.MOUSEBUTTONDOWN:
                     if confirm_button.collidepoint(event.pos) and self.pet_name:
                         running = False
@@ -308,7 +336,11 @@ class PetNamingScreen:
                             self.pet_name = 'Pet'
                         running = False
                 elif event.type == pygame.KEYDOWN:
-                    if event.key == pygame.K_RETURN:
+                    if event.key == pygame.K_f:
+                        self.is_fullscreen = not self.is_fullscreen
+                        flag = pygame.FULLSCREEN if self.is_fullscreen else 0
+                        self.screen = pygame.display.set_mode((self.screen_width, self.screen_height), flag)
+                    elif event.key == pygame.K_RETURN:
                         if self.pet_name:
                             running = False
                     elif event.key == pygame.K_BACKSPACE:
@@ -320,7 +352,6 @@ class PetNamingScreen:
             pygame.display.flip()
             clock.tick(60)
 
-        pygame.quit()
         return self.pet_name if self.pet_name else 'Pet'
 
 class ShopScreen:

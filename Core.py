@@ -69,7 +69,7 @@ def feed_pet(state):
     state.energy += 5
     record_action('feed')
     state.cap_stats()
-    return f"You fed {state.pet_name}! {pet_response('feed')}"
+    return f"You fed {state.pet_name}! {pet_response('feed', state.pet_name)}"
 
 
 def play_with_pet(state):
@@ -78,7 +78,7 @@ def play_with_pet(state):
     state.health += 10
     record_action('play')
     state.cap_stats()
-    return f"You played with {state.pet_name}! {pet_response('play')}"
+    return f"You played with {state.pet_name}! {pet_response('play', state.pet_name)}"
 
 
 def rest(state):
@@ -86,7 +86,7 @@ def rest(state):
     state.health += 10
     record_action('rest')
     state.cap_stats()
-    return f"{state.pet_name} rested and feels better! {pet_response('rest')}"
+    return f"{state.pet_name} rested and feels better! {pet_response('rest', state.pet_name)}"
 
 
 def clean_pet(state):
@@ -94,7 +94,7 @@ def clean_pet(state):
     state.happiness -= 5
     record_action('clean')
     state.cap_stats()
-    return f"You cleaned {state.pet_name}. {pet_response('clean')}"
+    return f"You cleaned {state.pet_name}. {pet_response('clean', state.pet_name)}"
 
 
 def play_minigame(state):
