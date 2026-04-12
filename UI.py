@@ -1,5 +1,7 @@
 import pygame
 import sys
+import visual_reactions
+from visual_reactions import ReactionAnimator, ReactionType
 
 
 class TitleScreen:
