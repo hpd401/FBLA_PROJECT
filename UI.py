@@ -62,6 +62,7 @@ class TitleScreen:
             return 'start_game'
         clock = pygame.time.Clock()
         running = True
+        pygame.event.clear()  # Clear input buffer
         while running:
             # Gradient background effect
             for y in range(self.screen_height):
@@ -102,7 +103,7 @@ class TitleScreen:
                     elif event.key == pygame.K_f:
                         self.is_fullscreen = not self.is_fullscreen
                         flag = pygame.FULLSCREEN if self.is_fullscreen else 0
-                        self.screen = pygame.display.set_mode((self.screen_width, self.screen_height), flag)
+                        self.screen = pygame.display.set_mode((self.screen_width, self.screen_height), flag, vsync=1)
 
             pygame.display.flip()
             clock.tick(60)
@@ -153,6 +154,7 @@ class PetSelection:
             print('No display available, defaulting to Dog.')
             return 'Dog'
         clock = pygame.time.Clock()
+        pygame.event.clear()  # Clear input buffer
         start_time = pygame.time.get_ticks()
         running = True
         selected_pet = None
@@ -280,6 +282,7 @@ class PetNamingScreen:
             return 'Pet'
         
         clock = pygame.time.Clock()
+        pygame.event.clear()  # Clear input buffer
         start_time = pygame.time.get_ticks()
         running = True
         
@@ -339,7 +342,7 @@ class PetNamingScreen:
                     if event.key == pygame.K_f:
                         self.is_fullscreen = not self.is_fullscreen
                         flag = pygame.FULLSCREEN if self.is_fullscreen else 0
-                        self.screen = pygame.display.set_mode((self.screen_width, self.screen_height), flag)
+                        self.screen = pygame.display.set_mode((self.screen_width, self.screen_height), flag, vsync=1)
                     elif event.key == pygame.K_RETURN:
                         if self.pet_name:
                             running = False
@@ -356,18 +359,24 @@ class PetNamingScreen:
 
 class ShopScreen:
     """Visual shop interface for purchasing pet items"""
-    def __init__(self, screen_width=1000, screen_height=700, pet_shop=None):
+    def __init__(self, screen_width=1000, screen_height=700, pet_shop=None, screen=None):
         self.screen_width = screen_width
         self.screen_height = screen_height
         self.pet_shop = pet_shop
         try:
-            self.screen = pygame.display.get_surface()
-            if self.screen is None:
-                self.screen = pygame.display.set_mode((self.screen_width, self.screen_height))
+            # Use provided screen or get current surface
+            if screen is not None:
+                self.screen = screen
+                self.screen_width = screen.get_width()
+                self.screen_height = screen.get_height()
+            else:
+                self.screen = pygame.display.get_surface()
+                if self.screen is None:
+                    self.screen = pygame.display.set_mode((self.screen_width, self.screen_height), vsync=1)
+            
             pygame.display.set_caption("Pet Shop")
             self.display_available = True
-            self.is_fullscreen = True
-            self.screen = pygame.display.set_mode((self.screen_width, self.screen_height), pygame.FULLSCREEN)
+            self.is_fullscreen = False
 
             self.BLACK = (0, 0, 0)
             self.WHITE = (255, 255, 255)
@@ -883,8 +892,14 @@ class HubScreen:
 
     def run(self, on_action):
         clock = pygame.time.Clock()
+        pygame.event.clear()  # Clear input buffer to prevent stale inputs
         running = True
         tutorial_waiting = False
+        # Reset pet to starting position
+        self.pet_x = 200
+        self.pet_y = 300
+        self.walking = False
+        self.current_frame = 0
         prev_x, prev_y = self.pet_x, self.pet_y
         
         while running:
@@ -912,10 +927,10 @@ class HubScreen:
                         # Toggle fullscreen
                         self.is_fullscreen = not self.is_fullscreen
                         if self.is_fullscreen:
-                            self.screen = pygame.display.set_mode((self.width, self.height), pygame.FULLSCREEN)
+                            self.screen = pygame.display.set_mode((self.width, self.height), pygame.FULLSCREEN, vsync=1)
                             self.message = "Fullscreen ON (Press F to exit)"
                         else:
-                            self.screen = pygame.display.set_mode((self.width, self.height))
+                            self.screen = pygame.display.set_mode((self.width, self.height), vsync=1)
                             self.message = "Fullscreen OFF"
                     elif event.key == pygame.K_e:
                         spot = self.get_current_spot()
@@ -965,17 +980,23 @@ class HubScreen:
 
 class MinigameSelectionScreen:
     """Visual minigame selection screen"""
-    def __init__(self, screen_width=900, screen_height=700):
+    def __init__(self, screen_width=900, screen_height=700, screen=None):
         self.screen_width = screen_width
         self.screen_height = screen_height
         try:
-            self.screen = pygame.display.get_surface()
-            if self.screen is None:
-                self.screen = pygame.display.set_mode((self.screen_width, self.screen_height))
+            # Use provided screen or get current surface
+            if screen is not None:
+                self.screen = screen
+                self.screen_width = screen.get_width()
+                self.screen_height = screen.get_height()
+            else:
+                self.screen = pygame.display.get_surface()
+                if self.screen is None:
+                    self.screen = pygame.display.set_mode((self.screen_width, self.screen_height), vsync=1)
+            
             pygame.display.set_caption("Choose a Minigame")
             self.display_available = True
-            self.is_fullscreen = True
-            self.screen = pygame.display.set_mode((self.screen_width, self.screen_height), pygame.FULLSCREEN)
+            self.is_fullscreen = False
 
             self.BLACK = (0, 0, 0)
             self.WHITE = (255, 255, 255)

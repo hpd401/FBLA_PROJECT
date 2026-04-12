@@ -97,8 +97,8 @@ def clean_pet(state):
     return f"You cleaned {state.pet_name}. {pet_response('clean', state.pet_name)}"
 
 
-def play_minigame(state):
-    minigame_selection = UI.MinigameSelectionScreen()
+def play_minigame(state, screen=None):
+    minigame_selection = UI.MinigameSelectionScreen(screen=screen)
     chosen_game = minigame_selection.run()
 
     if chosen_game == 'minigame_health':
@@ -131,7 +131,7 @@ def collect_income():
     return f'You received a paycheck of ${amount}!'
 
 
-def handle_hub_action(action_name, state, pet_shop=None):
+def handle_hub_action(action_name, state, pet_shop=None, screen=None):
     if action_name == 'Feed':
         return feed_pet(state)
     if action_name == 'Play':
@@ -141,17 +141,17 @@ def handle_hub_action(action_name, state, pet_shop=None):
     if action_name == 'Clean':
         return clean_pet(state)
     if action_name == 'Mini Game':
-        return play_minigame(state)
+        return play_minigame(state, screen=screen)
     if action_name == 'Shop':
-        return visit_shop(pet_shop)
+        return visit_shop(pet_shop, screen=screen)
     return None
 
 
-def visit_shop(pet_shop):
+def visit_shop(pet_shop, screen=None):
     """Open the visual shop screen"""
     if pet_shop is None:
         return "Shop is temporarily closed."
-    shop_screen = UI.ShopScreen(pet_shop=pet_shop)
+    shop_screen = UI.ShopScreen(pet_shop=pet_shop, screen=screen)
     shop_screen.player_currency = economy.get_balance()
     shop_screen.run()
     economy.set_balance(shop_screen.player_currency)
@@ -246,7 +246,7 @@ def main():
         interactive_tutorial = UI.InteractiveTutorialScreen(screen, tutorial_steps_with_actions)
         
         hub = UI.HubScreen(screen, state.pet_name, state.pet_type, animations, tutorial=interactive_tutorial)
-        hub.run(lambda action: handle_hub_action(action, state, pet_shop))
+        hub.run(lambda action: handle_hub_action(action, state, pet_shop, screen=screen))
         pygame.quit()
     else:
         print('\nNo graphical display detected. Starting the text-based hub instead.')
