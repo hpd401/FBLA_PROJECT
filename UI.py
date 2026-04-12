@@ -281,7 +281,12 @@ class HubScreen:
         if self.walking:
             if self.direction == 'right':
                 return self.animations.get('walk_right', self.animations.get('idle', []))
-            return self.animations.get('walk_left', self.animations.get('idle', []))
+            elif self.direction == 'left':
+                return self.animations.get('walk_left', self.animations.get('idle', []))
+            elif self.direction == 'up':
+                return self.animations.get('walk_up', self.animations.get('idle', []))
+            elif self.direction == 'down':
+                return self.animations.get('walk_down', self.animations.get('idle', []))
         return self.animations.get('idle', [])
 
     def get_current_sprite(self):
@@ -303,9 +308,11 @@ class HubScreen:
             self.walking = True
         if keys[pygame.K_UP] or keys[pygame.K_w]:
             self.pet_y -= self.speed
+            self.direction = 'up'
             self.walking = True
         if keys[pygame.K_DOWN] or keys[pygame.K_s]:
             self.pet_y += self.speed
+            self.direction = 'down'
             self.walking = True
 
         sprite = self.get_current_sprite()
