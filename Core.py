@@ -13,7 +13,7 @@ import sys
 import questionary
 import economy
 import UI
-import animatons
+import animations
 import pygame
 import minigames
 import store
@@ -42,12 +42,14 @@ class GameState:
             'clean': 3,
         }
         self.last_action_time = {
-            'feed': 0,
-            'water': 0,
-            'play': 0,
-            'rest': 0,
-            'clean': 0,
+            'feed': 0.0,
+            'water': 0.0,
+            'play': 0.0,
+            'rest': 0.0,
+            'clean': 0.0,
         }
+
+        self.lock = threading.Lock()
 
     def cap_stats(self):
         self.hunger = min(max(self.hunger, self.min_value), self.max_value)
@@ -85,11 +87,12 @@ class GameState:
 
 
 def stat_decay(state):
-    state.hunger -= 5
-    state.health -= 3
-    state.happiness -= 4
-    state.energy -= 2
-    state.cap_stats()
+    with state.lock:
+        state.hunger -= 5
+        state.health -= 3
+        state.happiness -= 4
+        state.energy -= 2
+        state.cap_stats()
     print(f"\n⏰ Time passes... {state.pet_name}'s stats have decayed slightly.")
 
 
@@ -152,13 +155,13 @@ def play_minigame(state, screen=None, is_fullscreen=False):
         return f"Simon Says completed! Happiness +{result.get('happiness', 0)}."
     elif chosen_game == 'minigame_hunger':
         result = minigames.minigame_hunger(screen=screen, is_fullscreen=is_fullscreen)
-        state.hunger = max(0, state.hunger - result.get('hunger', 0))
+        state.hunger += result.get('hunger', 0)
         state.happiness += result.get('happiness', 0)
         earned = result.get('dollars', 0)
         if earned:
             economy.add_dollars(earned, description='Treat Catch reward')
         state.cap_stats()
-        return f"Treat Catch completed! Hunger -{result.get('hunger', 0)}, earned ${earned}."
+        return f"Treat Catch completed! Hunger +{result.get('hunger', 0)}, earned ${earned}."
     return 'Back to the hub.'
 
 
@@ -185,22 +188,16 @@ def handle_hub_action(action_name, state, pet_shop=None, screen=None, is_fullscr
         return f"⏱️ {action_name} is on cooldown for {remaining:.1f}s"
     
     if action_name == 'Feed':
-        state.record_action('feed')
         return feed_pet(state)
     if action_name == 'Water':
-        state.record_action('water')
-        state.hunger = max(0, state.hunger - 15)
         record_action('water')
         state.cap_stats()
         return f"You gave {state.pet_name} water! {pet_response('water', state.pet_name)}"
     if action_name == 'Play':
-        state.record_action('play')
         return play_with_pet(state)
     if action_name == 'Rest':
-        state.record_action('rest')
         return rest(state)
     if action_name == 'Clean':
-        state.record_action('clean')
         return clean_pet(state)
     if action_name == 'Mini Game':
         return play_minigame(state, screen=screen, is_fullscreen=is_fullscreen)
@@ -218,48 +215,6 @@ def visit_shop(pet_shop, screen=None):
     shop_screen.run()
     economy.set_balance(shop_screen.player_currency)
     return "Thanks for visiting the shop!"
-
-
-def run_text_menu(state):
-    while True:
-        gained = economy.apply_interest()
-        if gained:
-            print(f"\nPassive interest: +${gained} (new balance ${economy.get_balance()})")
-
-        print(f"\n[Balance: ${economy.get_balance()} | Interest rate: {economy.interest_rate * 100:.1f}%]")
-        choice = questionary.select(
-            'What would you like to do?',
-            choices=[
-                f'Feed {state.pet_name}',
-                f'Play with {state.pet_name}',
-                'Rest',
-                'Show stats',
-                'Show wallet',
-                'Collect income',
-                'Play a minigame',
-                'Quit',
-            ],
-        ).ask()
-
-        if choice == f'Feed {state.pet_name}':
-            print(feed_pet(state))
-        elif choice == f'Play with {state.pet_name}':
-            print(play_with_pet(state))
-        elif choice == 'Rest':
-            print(rest(state))
-        elif choice == 'Show stats':
-            state.show_stats()
-        elif choice == 'Show wallet':
-            economy.print_economy_summary()
-        elif choice == 'Collect income':
-            print(collect_income())
-        elif choice == 'Play a minigame':
-            print(play_minigame(state))
-        elif choice == 'Quit':
-            print(f'Thanks for playing with {state.pet_name}! Goodbye!')
-            break
-        else:
-            print('Invalid choice. Please try again.')
 
 
 def main():
@@ -307,7 +262,7 @@ def main():
     # Resize screen for hub (800x600) and update caption
     screen = pygame.display.set_mode((800, 600), pygame.FULLSCREEN if fullscreen_state else 0, vsync=1)
     pygame.display.set_caption('Snugbit Hub')
-    animations = animatons.load_pet_animation(state.pet_type)
+    pet_animations = animations.load_pet_animation(state.pet_type)
     pet_shop = store.PetShop()
     
     # Interactive tutorial with action requirements
@@ -322,7 +277,7 @@ def main():
     
     interactive_tutorial = UI.InteractiveTutorialScreen(screen, tutorial_steps_with_actions)
     
-    hub = UI.HubScreen(screen, state.pet_name, state.pet_type, animations, tutorial=interactive_tutorial, start_fullscreen=fullscreen_state)
+    hub = UI.HubScreen(screen, state.pet_name, state.pet_type, pet_animations, tutorial=interactive_tutorial, start_fullscreen=fullscreen_state)
     def hub_action_callback(action):
         return handle_hub_action(action, state, pet_shop, screen=screen, is_fullscreen=hub.is_fullscreen)
     hub.run(hub_action_callback, state)
